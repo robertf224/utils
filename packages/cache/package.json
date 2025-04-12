@@ -1,0 +1,19 @@
+{
+    "name": "@bobbyfidz/cache",
+    "version": "0.0.0",
+    "type": "module",
+    "files": [
+        "lib"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "lint": "eslint",
+        "test": "vitest run"
+    },
+    "devDependencies": {
+        "@bobbyfidz/universal-build-config": "workspace:*",
+        "eslint": "^9.21.0",
+        "typescript": "~5.8.2",
+        "vitest": "^3.1.1"
+    }
+}
