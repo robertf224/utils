@@ -2,7 +2,7 @@
     "name": "@bobbyfidz/universal-build-config",
     "version": "0.0.0",
     "dependencies": {
-        "typescript-eslint": "^8.21.0",
-        "@eslint/js": "^9.18.0"
+        "typescript-eslint": "^8.29.1",
+        "@eslint/js": "^9.24.0"
     }
 }

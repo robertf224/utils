@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "dependencies": {
         "@bobbyfidz/universal-build-config": "workspace:*",
-        "eslint-plugin-react": "^7.37.4",
+        "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "^5.2.0"
     }
 }
