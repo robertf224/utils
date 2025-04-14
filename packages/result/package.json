@@ -1,10 +1,16 @@
 {
-    "name": "@bobbyfidz/cache",
+    "name": "@bobbyfidz/result",
     "version": "0.0.0",
     "type": "module",
     "files": [
         "lib"
     ],
+    "exports": {
+        ".": {
+            "types": "./lib/index.d.ts",
+            "default": "./lib/index.js"
+        }
+    },
     "scripts": {
         "build": "tsc",
         "lint": "eslint",
