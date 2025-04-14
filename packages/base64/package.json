@@ -1,0 +1,32 @@
+{
+    "name": "@bobbyfidz/base64",
+    "version": "0.0.0",
+    "type": "module",
+    "files": [
+        "lib"
+    ],
+    "exports": {
+        ".": {
+            "types": "./lib/index.d.ts",
+            "node": "./lib/node.js",
+            "browser": "./lib/browser.js"
+        }
+    },
+    "scripts": {
+        "build": "tsc",
+        "lint": "eslint",
+        "test:node": "vitest run",
+        "test:browser": "vitest run --environment jsdom"
+    },
+    "dependencies": {
+        "@bobbyfidz/result": "workspace:*"
+    },
+    "devDependencies": {
+        "@bobbyfidz/universal-build-config": "workspace:*",
+        "jsdom": "^26.1.0",
+        "@types/node": "^20.17.30",
+        "eslint": "^9.21.0",
+        "typescript": "~5.8.2",
+        "vitest": "^3.1.1"
+    }
+}
