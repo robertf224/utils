@@ -19,6 +19,9 @@
             "cache": false,
             "persistent": true,
             "dependsOn": ["^build"]
+        },
+        "//#lint-versions": {
+            "inputs": ["**/package.json"]
         }
     }
 }
