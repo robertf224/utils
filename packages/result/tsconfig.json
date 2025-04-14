@@ -1,4 +1,4 @@
 {
     "$schema": "https://json.schemastore.org/tsconfig",
-    "extends": "./node_modules/@bobbyfidz/universal-build-config/tsconfig-base.json"
+    "extends": "@bobbyfidz/universal-build-config/tsconfig-base.json"
 }
