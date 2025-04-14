@@ -33,7 +33,19 @@ importers:
         specifier: 2.3.3
         version: 2.3.3
 
-  packages/cache:
+  packages/react-build-config:
+    dependencies:
+      '@bobbyfidz/universal-build-config':
+        specifier: workspace:*
+        version: link:../universal-build-config
+      eslint-plugin-react:
+        specifier: ^7.37.4
+        version: 7.37.4(eslint@9.24.0(jiti@2.4.2))
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.24.0(jiti@2.4.2))
+
+  packages/result:
     devDependencies:
       '@bobbyfidz/universal-build-config':
         specifier: workspace:*
@@ -47,18 +59,6 @@ importers:
       vitest:
         specifier: ^3.1.1
         version: 3.1.1(jiti@2.4.2)(yaml@2.7.1)
-
-  packages/react-build-config:
-    dependencies:
-      '@bobbyfidz/universal-build-config':
-        specifier: workspace:*
-        version: link:../universal-build-config
-      eslint-plugin-react:
-        specifier: ^7.37.4
-        version: 7.37.4(eslint@9.24.0(jiti@2.4.2))
-      eslint-plugin-react-hooks:
-        specifier: ^5.2.0
-        version: 5.2.0(eslint@9.24.0(jiti@2.4.2))
 
   packages/universal-build-config:
     dependencies:
@@ -491,9 +491,6 @@ packages:
 
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
-
-  '@types/estree@1.0.6':
-    resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
 
   '@types/estree@1.0.7':
     resolution: {integrity: sha512-w28IoSUCJpidD/TGviZwwMJckNESJZXFu7NBZ5YJ4mEUnNraUn9Pm8HSZm/jDF1pDWYKspWE7oVphigUPRakIQ==}
@@ -2616,8 +2613,6 @@ snapshots:
 
   '@standard-schema/spec@1.0.0': {}
 
-  '@types/estree@1.0.6': {}
-
   '@types/estree@1.0.7': {}
 
   '@types/json-schema@7.0.15': {}
@@ -3200,7 +3195,7 @@ snapshots:
       '@humanfs/node': 0.16.6
       '@humanwhocodes/module-importer': 1.0.1
       '@humanwhocodes/retry': 0.4.2
-      '@types/estree': 1.0.6
+      '@types/estree': 1.0.7
       '@types/json-schema': 7.0.15
       ajv: 6.12.6
       chalk: 4.1.2
@@ -3249,7 +3244,7 @@ snapshots:
 
   estree-walker@3.0.3:
     dependencies:
-      '@types/estree': 1.0.6
+      '@types/estree': 1.0.7
 
   esutils@2.0.3: {}
 
