@@ -10,8 +10,10 @@ function isError<T, E extends Error>(result: Result<T, E>): result is Err<E> {
     return "error" in result;
 }
 
-function ok<T>(value: T): Ok<T> {
-    return { value };
+function ok(): Ok<void>;
+function ok<T>(value: T): Ok<T>;
+function ok<T>(value?: T): Ok<T> {
+    return { value: value as T };
 }
 
 function err<E extends Error = Error>(error: E): Err<E> {
