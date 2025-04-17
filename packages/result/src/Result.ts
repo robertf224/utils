@@ -6,7 +6,7 @@ function isOk<T>(result: Result<T>): result is Ok<T> {
     return "value" in result;
 }
 
-function isError<T, E extends Error>(result: Result<T, E>): result is Err<E> {
+function isErr<T, E extends Error>(result: Result<T, E>): result is Err<E> {
     return "error" in result;
 }
 
@@ -21,7 +21,14 @@ function err<E extends Error = Error>(error: E): Err<E> {
 }
 
 function map<T, U, E extends Error = Error>(result: Result<T, E>, mapper: (value: T) => U): Result<U, E> {
-    return isOk(result) ? ok(mapper(result.value)) : err(result.error);
+    return isOk(result) ? ok(mapper(result.value)) : result;
+}
+
+function mapErr<T, E extends Error = Error, U extends Error = Error>(
+    result: Result<T, E>,
+    mapper: (error: E) => U
+): Result<T, U> {
+    return isErr(result) ? err(mapper(result.error)) : result;
 }
 
 function unwrap<T>(result: Result<T>): T {
@@ -31,11 +38,20 @@ function unwrap<T>(result: Result<T>): T {
     throw result.error;
 }
 
+function unwrapErr<T, E extends Error = Error>(result: Result<T, E>): E {
+    if (isErr(result)) {
+        return result.error;
+    }
+    throw new Error("Tried to call unwrapErr on an ok Result.");
+}
+
 export const Result = {
     isOk,
-    isError,
+    isErr,
     ok,
     err,
     map,
+    mapErr,
     unwrap,
+    unwrapErr,
 };

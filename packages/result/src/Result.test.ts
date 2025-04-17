@@ -8,7 +8,7 @@ describe("Result", () => {
             const result = Result.ok(value);
             expect(result).toEqual({ value });
             expect(Result.isOk(result)).toBe(true);
-            expect(Result.isError(result)).toBe(false);
+            expect(Result.isErr(result)).toBe(false);
         });
     });
 
@@ -17,7 +17,7 @@ describe("Result", () => {
             const error = new Error("Something went wrong");
             const result = Result.err(error);
             expect(result).toEqual({ error });
-            expect(Result.isError(result)).toBe(true);
+            expect(Result.isErr(result)).toBe(true);
             expect(Result.isOk(result)).toBe(false);
         });
     });
@@ -49,6 +49,39 @@ describe("Result", () => {
             const error = new Error("oops");
             const result = Result.err(error);
             expect(() => Result.unwrap(result)).toThrow(error);
+        });
+    });
+
+    describe("mapErr", () => {
+        it("should map an error value", () => {
+            const error = new Error("original error");
+            const result = Result.err(error);
+            const mappedResult = Result.mapErr(result, (e) => new Error(`Mapped: ${e.message}`));
+            expect(mappedResult).toEqual({ error: new Error("Mapped: original error") });
+        });
+
+        it("should not apply the mapper when result is ok", () => {
+            const value = 42;
+            const result = Result.ok(value);
+            const mappedResult = Result.mapErr(
+                result,
+                (e) => new Error("This should not be called", { cause: e })
+            );
+            expect(mappedResult).toEqual({ value });
+        });
+    });
+
+    describe("unwrapErr", () => {
+        it("should return the error for an error result", () => {
+            const error = new Error("failure");
+            const result = Result.err(error);
+            expect(Result.unwrapErr(result)).toBe(error);
+        });
+
+        it("should throw when called on an ok result", () => {
+            const value = "success";
+            const result = Result.ok(value);
+            expect(() => Result.unwrapErr(result)).toThrow("Tried to call unwrapErr on an ok Result.");
         });
     });
 });
