@@ -1,5 +1,11 @@
 # @bobbyfidz/result
 
+## 0.3.0
+
+### Minor Changes
+
+- 806d3b3: add a couple new functions and change isError to isErr
+
 ## 0.2.0
 
 ### Minor Changes
