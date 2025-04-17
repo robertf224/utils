@@ -7,7 +7,6 @@ export default [
     react.configs.flat.recommended,
     react.configs.flat["jsx-runtime"],
     reactHooks.configs["recommended-latest"],
-
     {
         rules: {
             "react/prop-types": "off",

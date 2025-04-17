@@ -1,6 +1,6 @@
+import { Result } from "@bobbyfidz/result";
 import { describe, it, expect } from "vitest";
 import { Base64 } from "./node.js";
-import { Result } from "@bobbyfidz/result";
 
 describe("Base64", () => {
     it("encodes a string to base64", () => {
