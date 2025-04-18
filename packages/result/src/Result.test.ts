@@ -45,10 +45,15 @@ describe("Result", () => {
             expect(Result.unwrap(result)).toBe(value);
         });
 
-        it("should throw the error for an error result", () => {
+        it("should throw an error for an error result with the original error as the cause", () => {
             const error = new Error("oops");
             const result = Result.err(error);
-            expect(() => Result.unwrap(result)).toThrow(error);
+            expect(() => Result.unwrap(result)).toThrow(
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                expect.objectContaining({
+                    cause: error,
+                })
+            );
         });
     });
 

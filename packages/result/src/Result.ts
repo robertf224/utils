@@ -35,7 +35,7 @@ function unwrap<T>(result: Result<T>): T {
     if (isOk(result)) {
         return result.value;
     }
-    throw result.error;
+    throw new Error("Tried to call unwrap on an err Result.", { cause: result.error });
 }
 
 function unwrapErr<T, E extends Error = Error>(result: Result<T, E>): E {
