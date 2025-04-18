@@ -1,5 +1,14 @@
 # @bobbyfidz/base64
 
+## 0.1.3
+
+### Patch Changes
+
+- 8efbc5d: add import sorting
+- 5c01090: add panics
+- Updated dependencies [5c01090]
+    - @bobbyfidz/result@0.3.1
+
 ## 0.1.2
 
 ### Patch Changes

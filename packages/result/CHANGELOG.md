@@ -1,5 +1,11 @@
 # @bobbyfidz/result
 
+## 0.3.1
+
+### Patch Changes
+
+- 5c01090: add panics
+
 ## 0.3.0
 
 ### Minor Changes
