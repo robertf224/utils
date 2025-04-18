@@ -1,7 +1,6 @@
 /** @type {import("syncpack").RcFile} */
 const config = {
     dependencyTypes: ["prod", "dev"],
-    specifierTypes: ["range", "exact", "file", "workspace-protocol"],
     semverGroups: [
         {
             range: "~",
@@ -12,9 +11,14 @@ const config = {
             dependencies: ["next", "eslint-config-next", "turbo"],
         },
         {
+            specifierTypes: ["workspace-protocol", "file"],
+            isIgnored: true,
+        },
+        {
             range: "^",
         },
     ],
+    lintFormatting: false,
 };
 
 module.exports = config;
