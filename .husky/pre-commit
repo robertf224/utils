@@ -1,2 +1,1 @@
 pnpm lint-staged
-pnpm turbo lint --filter [main...HEAD] -- --fix

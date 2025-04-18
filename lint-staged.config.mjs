@@ -3,4 +3,4 @@ const config = {
     "*": "prettier --write --ignore-unknown",
 };
 
-module.exports = config;
+export default config;
