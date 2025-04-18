@@ -8,8 +8,8 @@ function encode(input: string): string {
 function decode(input: string): Result<string, Base64DecodingError> {
     try {
         return Result.ok(atob(input));
-    } catch {
-        return Result.err(new Base64DecodingError());
+    } catch (error) {
+        return Result.err(new Base64DecodingError({ cause: error }));
     }
 }
 

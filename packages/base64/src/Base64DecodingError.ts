@@ -1,6 +1,7 @@
 export class Base64DecodingError extends Error {
-    constructor(message?: string) {
-        super(message);
-        this.name = this.constructor.name;
+    name = this.constructor.name;
+
+    constructor(options: ErrorOptions) {
+        super("Failed to decode base64 string.", options);
     }
 }

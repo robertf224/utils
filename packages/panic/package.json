@@ -1,0 +1,25 @@
+{
+    "name": "@bobbyfidz/panic",
+    "version": "0.0.0",
+    "type": "module",
+    "files": [
+        "lib"
+    ],
+    "exports": {
+        ".": {
+            "types": "./lib/index.d.ts",
+            "default": "./lib/index.js"
+        }
+    },
+    "scripts": {
+        "build": "tsc",
+        "lint": "eslint",
+        "test": "vitest run"
+    },
+    "devDependencies": {
+        "@bobbyfidz/universal-build-config": "workspace:*",
+        "eslint": "^9.21.0",
+        "typescript": "~5.8.2",
+        "vitest": "^3.1.1"
+    }
+}
