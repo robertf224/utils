@@ -1,6 +1,6 @@
-import { Hono } from "hono";
+import { invariant } from "@bobbyfidz/panic";
 import { serve } from "@hono/node-server";
-import open from "open";
+import { Hono } from "hono";
 import {
     authorizationCodeGrantRequest,
     processAuthorizationCodeResponse,
@@ -14,7 +14,7 @@ import {
     processDiscoveryResponse,
     discoveryRequest,
 } from "oauth4webapi";
-import { invariant } from "@bobbyfidz/panic";
+import open from "open";
 
 export interface OAuthFlowOpts {
     issuerUrl: string;
@@ -116,7 +116,7 @@ export async function performLocalOAuthFlow({
         fetch: app.fetch,
         port: Number.parseInt(port, 10),
         hostname,
-    });
+    }) as { close: () => void };
 
     try {
         const authorizationEndpoint = authorizationServer.authorization_endpoint;
