@@ -1,0 +1,30 @@
+{
+    "name": "@bobbyfidz/local-oauth-flow",
+    "version": "0.0.0",
+    "type": "module",
+    "files": [
+        "lib"
+    ],
+    "exports": {
+        ".": {
+            "types": "./lib/index.d.ts",
+            "default": "./lib/index.js"
+        }
+    },
+    "scripts": {
+        "build": "tsc",
+        "lint": "eslint"
+    },
+    "dependencies": {
+        "oauth4webapi": "^3.5.1",
+        "hono": "^4.7.9",
+        "open": "^10.1.2",
+        "@bobbyfidz/panic": "workspace:*",
+        "@hono/node-server": "^1.8.2"
+    },
+    "devDependencies": {
+        "@bobbyfidz/universal-build-config": "workspace:*",
+        "eslint": "^9.21.0",
+        "typescript": "~5.8.2"
+    }
+}
