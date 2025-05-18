@@ -13,7 +13,7 @@ function join<T extends URL | string>(base: T, ...paths: string[]): T {
     const joinedPath = allPaths.join("/");
     const finalPath = joinedPath ? `/${joinedPath}` : "/";
 
-    if (base instanceof URL) {
+    if (baseUrl instanceof URL) {
         const newUrl = new URL(base);
         newUrl.pathname = finalPath;
         return newUrl as T;
