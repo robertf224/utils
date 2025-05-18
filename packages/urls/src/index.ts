@@ -1,14 +1,10 @@
 function join<T extends URL | string>(base: T, ...paths: string[]): T {
-    const baseUrl: URL | string =
-        base instanceof URL
-            ? base
-            : (() => {
-                  try {
-                      return new URL(base);
-                  } catch {
-                      return base;
-                  }
-              })();
+    let baseUrl: URL | string;
+    try {
+        baseUrl = new URL(base);
+    } catch {
+        baseUrl = base;
+    }
 
     const basePath: string = baseUrl instanceof URL ? baseUrl.pathname : baseUrl;
     const normalizedBasePath = basePath.replace(/^\/+|\/+$/g, "");
