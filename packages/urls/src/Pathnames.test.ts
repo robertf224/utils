@@ -52,6 +52,11 @@ describe("Urls.join", () => {
         expect(result).toBe("/api/users/john%20doe");
     });
 
+    it("handles an empty leading slash", () => {
+        const result = Pathnames.join("/", "/test");
+        expect(result).toBe("/test");
+    });
+
     describe("with URL objects", () => {
         it("composes with URL constructor", () => {
             const base = "https://example.com";
