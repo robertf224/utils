@@ -1,5 +1,11 @@
 # @bobbyfidz/urls
 
+## 0.2.1
+
+### Patch Changes
+
+- d72b6e7: fix leading slash bug
+
 ## 0.2.0
 
 ### Minor Changes
