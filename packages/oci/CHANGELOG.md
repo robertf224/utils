@@ -1,5 +1,11 @@
 # @bobbyfidz/oci
 
+## 0.2.2
+
+### Patch Changes
+
+- 39818cd: fix exposed ports
+
 ## 0.2.1
 
 ### Patch Changes
