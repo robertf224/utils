@@ -1,7 +1,7 @@
 import { exec } from "child_process";
 import path from "path";
 import { promisify } from "util";
-import { BinaryDownload } from "@bobbyfidz/binary-download";
+import { BinaryDownload } from "@bobbyfidz/binaries";
 
 const execAsync = promisify(exec);
 

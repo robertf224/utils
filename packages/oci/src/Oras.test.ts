@@ -33,7 +33,7 @@ vi.mock("path", () => ({
 }));
 
 // Mock BinaryDownload
-vi.mock("@bobbyfidz/binary-download", () => ({
+vi.mock("@bobbyfidz/binaries", () => ({
     BinaryDownload: {
         ensure: vi.fn(() => Promise.resolve("/tmp/oras")),
     },

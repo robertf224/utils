@@ -1,4 +1,4 @@
-# @bobbyfidz/binary-download
+# @bobbyfidz/binaries
 
 ## 0.2.0
 

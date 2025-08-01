@@ -9,5 +9,5 @@
 ### Patch Changes
 
 - Updated dependencies [f4bf870]
-    - @bobbyfidz/binary-download@0.2.0
+    - @bobbyfidz/binaries@0.2.0
     - @bobbyfidz/temp@0.2.0
