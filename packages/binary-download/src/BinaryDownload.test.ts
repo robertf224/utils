@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as fsPromises from "fs/promises";
 import * as streamPromises from "stream/promises";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { BinaryDownload } from "./BinaryDownload.js";
@@ -13,14 +14,27 @@ vi.mock("fs", () => ({
     writeFileSync: vi.fn(),
 }));
 
+// Mock fs/promises
+vi.mock("fs/promises", () => ({
+    mkdir: vi.fn(),
+}));
+
 // Mock os.homedir
 vi.mock("os", () => ({
     homedir: vi.fn(() => "/home/test"),
     tmpdir: vi.fn(() => "/tmp"),
 }));
 
-// Mock path.join
+// Mock path module
 vi.mock("path", () => ({
+    default: {
+        join: vi.fn((...args: string[]) => args.join("/")),
+        dirname: vi.fn((path: string) => path.split("/").slice(0, -1).join("/")),
+        extname: vi.fn((filename: string) => {
+            const ext = filename.split(".").pop();
+            return ext ? `.${ext}` : "";
+        }),
+    },
     join: vi.fn((...args: string[]) => args.join("/")),
     dirname: vi.fn((path: string) => path.split("/").slice(0, -1).join("/")),
     extname: vi.fn((filename: string) => {
@@ -74,15 +88,15 @@ describe("BinaryDownload", () => {
     describe("ensure", () => {
         it("should download and install binary when not cached", async () => {
             const mockExistsSync = vi.mocked(fs.existsSync);
-            const mockMkdirSync = vi.mocked(fs.mkdirSync);
-            const mockCopyFileSync = vi.mocked(fs.copyFileSync);
+            const mockMkdir = vi.mocked(fsPromises.mkdir);
             const mockFetch = vi.mocked(global.fetch);
             const mockPipeline = vi.mocked(streamPromises.pipeline);
 
-            // Mock that cache doesn't exist initially
-            mockExistsSync.mockReturnValueOnce(false); // cache folder doesn't exist
-            mockExistsSync.mockReturnValueOnce(false); // cached binary doesn't exist
+            // Mock that binary doesn't exist
             mockExistsSync.mockReturnValueOnce(false); // final binary doesn't exist
+
+            // Mock successful mkdir
+            mockMkdir.mockResolvedValue(undefined);
 
             // Mock successful fetch response
             const mockResponse = {
@@ -105,49 +119,18 @@ describe("BinaryDownload", () => {
                 "/destination"
             );
 
-            expect(mockMkdirSync).toHaveBeenCalledWith("/home/test/.cache/binary-download", {
+            expect(mockMkdir).toHaveBeenCalledWith("/destination/test-binary/1.0.0", {
                 recursive: true,
             });
             expect(mockFetch).toHaveBeenCalledWith("https://example.com/test-binary-1.0.0.tar.gz");
             expect(mockPipeline).toHaveBeenCalled();
-            expect(mockCopyFileSync).toHaveBeenCalledWith(
-                "/home/test/.cache/binary-download/test-binary-1.0.0-test-hash-1234567890abcdef",
-                "/destination/test-binary/1.0.0/test-binary"
-            );
-            expect(result).toBe("/destination/test-binary/1.0.0/test-binary");
-        });
-
-        it("should use cached binary when available", async () => {
-            const mockExistsSync = vi.mocked(fs.existsSync);
-            const mockCopyFileSync = vi.mocked(fs.copyFileSync);
-
-            // Mock that cache exists but final binary doesn't
-            mockExistsSync.mockReturnValueOnce(true); // cache folder exists
-            mockExistsSync.mockReturnValueOnce(true); // cached binary exists
-            mockExistsSync.mockReturnValueOnce(false); // final binary doesn't exist
-
-            const result = await BinaryDownload.ensure(
-                "test-binary",
-                "1.0.0",
-                () => ({
-                    url: "https://example.com/test-binary-1.0.0.tar.gz",
-                }),
-                "/destination"
-            );
-
-            expect(mockCopyFileSync).toHaveBeenCalledWith(
-                "/home/test/.cache/binary-download/test-binary-1.0.0-test-hash-1234567890abcdef",
-                "/destination/test-binary/1.0.0/test-binary"
-            );
             expect(result).toBe("/destination/test-binary/1.0.0/test-binary");
         });
 
         it("should return existing binary path when already installed", async () => {
             const mockExistsSync = vi.mocked(fs.existsSync);
 
-            // Mock that both cache and final binary exist
-            mockExistsSync.mockReturnValueOnce(true); // cache folder exists
-            mockExistsSync.mockReturnValueOnce(true); // cached binary exists
+            // Mock that binary already exists
             mockExistsSync.mockReturnValueOnce(true); // final binary exists
 
             const result = await BinaryDownload.ensure(
@@ -164,11 +147,14 @@ describe("BinaryDownload", () => {
 
         it("should throw error for unsupported file type", async () => {
             const mockExistsSync = vi.mocked(fs.existsSync);
+            const mockMkdir = vi.mocked(fsPromises.mkdir);
             const mockFetch = vi.mocked(global.fetch);
 
-            // Mock that cache doesn't exist
+            // Mock that binary doesn't exist (so downloadAndInstallBinary will be called)
             mockExistsSync.mockReturnValueOnce(false);
-            mockExistsSync.mockReturnValueOnce(false);
+
+            // Mock successful mkdir
+            mockMkdir.mockResolvedValue(undefined);
 
             // Mock successful fetch response
             const mockResponse = {
@@ -193,11 +179,14 @@ describe("BinaryDownload", () => {
 
         it("should throw error for failed download", async () => {
             const mockExistsSync = vi.mocked(fs.existsSync);
+            const mockMkdir = vi.mocked(fsPromises.mkdir);
             const mockFetch = vi.mocked(global.fetch);
 
-            // Mock that cache doesn't exist
+            // Mock that binary doesn't exist (so downloadAndInstallBinary will be called)
             mockExistsSync.mockReturnValueOnce(false);
-            mockExistsSync.mockReturnValueOnce(false);
+
+            // Mock successful mkdir
+            mockMkdir.mockResolvedValue(undefined);
 
             // Mock failed fetch response
             const mockResponse = {

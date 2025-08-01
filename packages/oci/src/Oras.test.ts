@@ -52,7 +52,8 @@ describe("Oras", () => {
             });
 
             expect(mockExec).toHaveBeenCalledWith(
-                expect.stringContaining("oras push --plain-http localhost:5000/test:v1 file.txt")
+                expect.stringContaining("oras push --plain-http localhost:5000/test:v1 file.txt"),
+                { cwd: undefined }
             );
         });
 
@@ -66,7 +67,8 @@ describe("Oras", () => {
             });
 
             expect(mockExec).toHaveBeenCalledWith(
-                expect.stringContaining("oras push registry.example.com/myapp:v1 file1.txt file2.txt")
+                expect.stringContaining("oras push registry.example.com/myapp:v1 file1.txt file2.txt"),
+                { cwd: undefined }
             );
         });
 
