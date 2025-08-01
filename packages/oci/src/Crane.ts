@@ -91,7 +91,7 @@ async function mutate(opts: {
 
     if (opts.exposedPorts) {
         for (const port of opts.exposedPorts) {
-            args.push("--port", port.toString());
+            args.push("--exposed-ports", port.toString());
         }
     }
 
