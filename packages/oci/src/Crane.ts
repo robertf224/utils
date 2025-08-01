@@ -30,13 +30,25 @@ async function ensureBinary(): Promise<string> {
                 url: `https://github.com/google/go-containerregistry/releases/download/v${VERSION}/go-containerregistry_${platform}_${arch}.tar.gz`,
             };
         },
-        path.join(__dirname, "..", "node_modules", ".cache", "oci")
+        path.join(import.meta.dirname, "..", "node_modules", ".cache", "oci")
     );
 }
 
 async function executeCommand(args: string[]): Promise<{ stdout: string; stderr: string }> {
     const cliPath = await ensureBinary();
     return await execAsync(`${cliPath} ${args.join(" ")}`);
+}
+
+async function login(opts: { username: string; password: string; registry: string }): Promise<void> {
+    await executeCommand([
+        "auth",
+        "login",
+        opts.registry,
+        "--username",
+        opts.username,
+        "--password",
+        opts.password,
+    ]);
 }
 
 async function mutate(opts: {
@@ -58,7 +70,9 @@ async function mutate(opts: {
     }
 
     if (opts.cmd) {
-        args.push("--cmd", ...opts.cmd);
+        for (const cmd of opts.cmd) {
+            args.push("--cmd", `"${cmd}"`);
+        }
     }
 
     if (opts.user) {
@@ -89,5 +103,6 @@ async function mutate(opts: {
 }
 
 export const Crane = {
+    login,
     mutate,
 };

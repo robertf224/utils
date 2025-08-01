@@ -15,20 +15,33 @@ async function ensureBinary(): Promise<string> {
         (binaryTarget) => ({
             url: `https://github.com/oras-project/oras/releases/download/v${VERSION}/oras_${VERSION}_${binaryTarget.platform}_${binaryTarget.arch === "x64" ? "amd64" : "arm64"}.tar.gz`,
         }),
-        path.join(__dirname, "..", "node_modules", ".cache", "oci")
+        path.join(import.meta.dirname, "..", "node_modules", ".cache", "oci")
     );
 }
 
-async function executeCommand(args: string[]): Promise<{ stdout: string; stderr: string }> {
+async function executeCommand(args: string[], cwd?: string): Promise<{ stdout: string; stderr: string }> {
     const cliPath = await ensureBinary();
-    return await execAsync(`${cliPath} ${args.join(" ")}`);
+    return await execAsync(`${cliPath} ${args.join(" ")}`, { cwd });
 }
 
 /**
- * Push an artifact to a registry
+ * Push an artifact to a registry.
  */
-async function push(opts: { paths: string[]; tag: string }): Promise<void> {
+async function push(opts: {
+    username?: string;
+    password?: string;
+    paths: string[];
+    tag: string;
+}): Promise<void> {
     const args = ["push"];
+
+    if (opts.username) {
+        args.push("--username", opts.username);
+    }
+
+    if (opts.password) {
+        args.push("--password", opts.password);
+    }
 
     if (opts.tag.startsWith("localhost")) {
         args.push("--plain-http");
@@ -40,6 +53,30 @@ async function push(opts: { paths: string[]; tag: string }): Promise<void> {
     await executeCommand(args);
 }
 
+/**
+ * Pull an artifact from a registry.
+ */
+async function pull(opts: { username?: string; password?: string; tag: string; cwd: string }): Promise<void> {
+    const args = ["pull"];
+
+    if (opts.username) {
+        args.push("--username", opts.username);
+    }
+
+    if (opts.password) {
+        args.push("--password", opts.password);
+    }
+
+    if (opts.tag.startsWith("localhost")) {
+        args.push("--plain-http");
+    }
+
+    args.push(opts.tag);
+
+    await executeCommand(args, opts.cwd);
+}
+
 export const Oras = {
     push,
+    pull,
 };

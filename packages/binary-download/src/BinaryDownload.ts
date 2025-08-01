@@ -1,15 +1,12 @@
-import { createHash } from "crypto";
-import { existsSync, mkdirSync, copyFileSync, createWriteStream } from "fs";
-import os from "os";
+import { existsSync } from "fs";
+import { mkdir } from "fs/promises";
 import path from "path";
 import { Readable } from "stream";
 import { pipeline } from "stream/promises";
-import { ReadableStream } from "stream/web";
 import { invariant } from "@bobbyfidz/panic";
 import * as tar from "tar";
 import { BinaryTarget } from "./BinaryTarget.js";
-
-const CACHE_FOLDER = path.join(os.homedir(), ".cache", "binary-download");
+import type { ReadableStream } from "stream/web";
 
 async function ensure(
     name: string,
@@ -25,19 +22,11 @@ async function ensure(
 
     const { url: downloadUrl } = opts(binaryTarget);
 
-    if (!existsSync(CACHE_FOLDER)) {
-        mkdirSync(CACHE_FOLDER, { recursive: true });
-    }
-
-    const urlHash = createHash("sha256").update(downloadUrl).digest("hex").slice(0, 16);
-    const cachedBinaryPath = path.join(CACHE_FOLDER, `${name}-${version}-${urlHash}`);
-    if (!existsSync(cachedBinaryPath)) {
-        await downloadAndInstallBinary(downloadUrl, name, cachedBinaryPath);
-    }
-
-    const binaryPath = path.join(destinationFolder, name, version, name);
+    const downloadPath = path.join(destinationFolder, name, version);
+    const binaryPath = path.join(downloadPath, name);
     if (!existsSync(binaryPath)) {
-        copyFileSync(cachedBinaryPath, binaryPath);
+        await mkdir(downloadPath, { recursive: true });
+        await downloadAndInstallBinary(downloadUrl, name, downloadPath);
     }
 
     return binaryPath;
@@ -60,8 +49,12 @@ async function downloadAndInstallBinary(
 
     await pipeline(
         Readable.fromWeb(response.body as ReadableStream),
-        tar.extract({}, [binaryPath]),
-        createWriteStream(downloadPath)
+        tar.extract(
+            {
+                cwd: downloadPath,
+            },
+            [binaryPath]
+        )
     );
 }
 

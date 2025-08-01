@@ -7,6 +7,8 @@ import { Crane } from "./Crane.js";
 import { Oras } from "./Oras.js";
 
 async function publishImage(opts: {
+    username?: string;
+    password?: string;
     /** The reference image to start from. */
     from: string;
     /** Folders to copy into the image. */
@@ -36,11 +38,20 @@ async function publishImage(opts: {
             await tar.create(
                 {
                     file: tarball,
+                    cwd: tempFolder,
                 },
-                [destinationFolder]
+                [copy.destinationFolder.slice(1)]
             );
             tarballs.push(tarball);
         }
+    }
+
+    if (opts.username && opts.password) {
+        await Crane.login({
+            registry: opts.tag.split("/")[0]!,
+            username: opts.username,
+            password: opts.password,
+        });
     }
 
     await Crane.mutate({
@@ -56,18 +67,40 @@ async function publishImage(opts: {
 }
 
 async function publishArtifact(opts: {
+    username?: string;
+    password?: string;
     /** The paths to include in the artifact. */
     paths: string[];
     /** The tag to apply to the new artifact. */
     tag: string;
 }): Promise<void> {
     await Oras.push({
+        username: opts.username,
+        password: opts.password,
         paths: opts.paths,
         tag: opts.tag,
+    });
+}
+
+async function pullArtifact(opts: {
+    username?: string;
+    password?: string;
+    /** The tag to pull the artifact from. */
+    tag: string;
+    /** The folder to output the artifact to. */
+    outputFolder: string;
+}): Promise<void> {
+    await mkdir(opts.outputFolder, { recursive: true });
+    await Oras.pull({
+        username: opts.username,
+        password: opts.password,
+        tag: opts.tag,
+        cwd: opts.outputFolder,
     });
 }
 
 export const Oci = {
     publishImage,
     publishArtifact,
+    pullArtifact,
 };
