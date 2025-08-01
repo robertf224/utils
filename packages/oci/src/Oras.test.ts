@@ -1,4 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Oras } from "./Oras.js";
 
