@@ -73,7 +73,7 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1(@types/node@20.17.30)(jiti@2.4.2)(jsdom@26.1.0)(yaml@2.7.1)
 
-  packages/binary-download:
+  packages/binaries:
     dependencies:
       '@bobbyfidz/panic':
         specifier: workspace:*
@@ -125,9 +125,9 @@ importers:
 
   packages/oci:
     dependencies:
-      '@bobbyfidz/binary-download':
+      '@bobbyfidz/binaries':
         specifier: workspace:*
-        version: link:../binary-download
+        version: link:../binaries
       '@bobbyfidz/panic':
         specifier: workspace:*
         version: link:../panic
