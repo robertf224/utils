@@ -13,7 +13,7 @@
         },
         "test": {
             "dependsOn": ["build"],
-            "inputs": ["src/**/*.test.{ts,tsx}", "vitest.config.ts"]
+            "inputs": ["src/**/*.test.{ts,tsx}", "vitest.config.mjs"]
         },
         "dev": {
             "cache": false,
