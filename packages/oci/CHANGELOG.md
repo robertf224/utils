@@ -1,5 +1,11 @@
 # @bobbyfidz/oci
 
+## 0.3.0
+
+### Minor Changes
+
+- f19cdab: add labels
+
 ## 0.2.2
 
 ### Patch Changes
