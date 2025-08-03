@@ -58,6 +58,7 @@ async function mutate(opts: {
     user?: string;
     workdir?: string;
     env?: Record<string, string>;
+    labels?: Record<string, string>;
     exposedPorts?: number[];
     tag?: string;
 }): Promise<void> {
@@ -86,6 +87,12 @@ async function mutate(opts: {
     if (opts.env) {
         for (const [key, value] of Object.entries(opts.env)) {
             args.push("--env", `${key}=${value}`);
+        }
+    }
+
+    if (opts.labels) {
+        for (const [key, value] of Object.entries(opts.labels)) {
+            args.push("--label", `${key}=${value}`);
         }
     }
 

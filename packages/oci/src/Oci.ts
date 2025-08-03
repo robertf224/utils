@@ -17,6 +17,7 @@ async function publishImage(opts: {
     user?: string;
     workdir?: string;
     env?: Record<string, string>;
+    labels?: Record<string, string>;
     /** The ports to expose on the image. */
     expose?: number[];
     /** The tag to apply to the new image. */
@@ -61,6 +62,7 @@ async function publishImage(opts: {
         user: opts.user,
         workdir: opts.workdir,
         env: opts.env,
+        labels: opts.labels,
         exposedPorts: opts.expose,
         tag: opts.tag,
     });
