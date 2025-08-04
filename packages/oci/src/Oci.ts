@@ -22,6 +22,7 @@ async function publishImage(opts: {
     expose?: number[];
     /** The tag to apply to the new image. */
     tag: string;
+    dryRun?: boolean;
 }): Promise<void> {
     invariant(
         opts.copy.every((copy) => isAbsolute(copy.destinationFolder)),
@@ -40,6 +41,7 @@ async function publishImage(opts: {
                 {
                     file: tarball,
                     cwd: tempFolder,
+                    follow: true,
                 },
                 [copy.destinationFolder.slice(1)]
             );
@@ -55,6 +57,12 @@ async function publishImage(opts: {
         });
     }
 
+    let output: string | undefined;
+    if (opts.dryRun) {
+        const [name, version] = opts.tag.split("/")[2]!.split(":");
+        output = `${name}-${version}.tar`;
+    }
+
     await Crane.mutate({
         imageReference: opts.from,
         append: tarballs,
@@ -65,6 +73,7 @@ async function publishImage(opts: {
         labels: opts.labels,
         exposedPorts: opts.expose,
         tag: opts.tag,
+        output,
     });
 }
 
