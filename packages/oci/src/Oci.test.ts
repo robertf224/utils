@@ -84,6 +84,36 @@ describe("Oci", () => {
                 tag: "myapp:v1",
             });
         });
+
+        it("should pack image into a tarball and follow symlinks when dryRun is true", async () => {
+            const mockCrane = await import("./Crane.js");
+            const mockMutate = vi.mocked(mockCrane.Crane.mutate);
+
+            const tarModule = await import("tar");
+            const tarCreate = vi.mocked(tarModule.create);
+
+            await Oci.publishImage({
+                from: "alpine:latest",
+                copy: [{ sourceFolder: "/src", destinationFolder: "/app" }],
+                tag: "registry.example.com/myorg/myapp:v1",
+                dryRun: true,
+            });
+
+            // ensure symlinks are followed during packing
+            expect(tarCreate).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    follow: true,
+                }),
+                expect.any(Array)
+            );
+
+            // ensure dry run packs image into a tarball
+            expect(mockMutate).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    output: "myapp-v1.tar",
+                })
+            );
+        });
     });
 
     describe("publishArtifact", () => {

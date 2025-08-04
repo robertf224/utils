@@ -61,6 +61,7 @@ async function mutate(opts: {
     labels?: Record<string, string>;
     exposedPorts?: number[];
     tag?: string;
+    output?: string;
 }): Promise<void> {
     const args = ["mutate", opts.imageReference];
 
@@ -104,6 +105,10 @@ async function mutate(opts: {
 
     if (opts.tag) {
         args.push("--tag", opts.tag);
+    }
+
+    if (opts.output) {
+        args.push("--output", opts.output);
     }
 
     await executeCommand(args);
