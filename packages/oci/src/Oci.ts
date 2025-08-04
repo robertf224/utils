@@ -35,7 +35,7 @@ async function publishImage(opts: {
             const tempFolder = await Temp.folder();
             const destinationFolder = path.join(tempFolder, copy.destinationFolder);
             await mkdir(destinationFolder, { recursive: true });
-            await cp(copy.sourceFolder, destinationFolder, { recursive: true });
+            await cp(copy.sourceFolder, destinationFolder, { recursive: true, verbatimSymlinks: true });
             const tarball = await Temp.file(".tar");
             await tar.create(
                 {
