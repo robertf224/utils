@@ -1,5 +1,11 @@
 # @bobbyfidz/oci
 
+## 0.3.1
+
+### Patch Changes
+
+- 5805c4e: fix symlinks
+
 ## 0.3.0
 
 ### Minor Changes
