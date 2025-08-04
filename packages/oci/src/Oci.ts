@@ -41,7 +41,6 @@ async function publishImage(opts: {
                 {
                     file: tarball,
                     cwd: tempFolder,
-                    follow: true,
                 },
                 [copy.destinationFolder.slice(1)]
             );
