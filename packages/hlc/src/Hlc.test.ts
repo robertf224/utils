@@ -5,15 +5,13 @@ describe("HLC", () => {
     test("tick generates increasing counters within same timestamp", () => {
         let state = Hlc.create("nodeA", 0);
 
-        let ts1: Hlc;
         state = Hlc.tick(state, () => 1_000);
-        ts1 = state;
+        const ts1: Hlc = state;
         expect(ts1.timestamp).toBe(1_000);
         expect(ts1.counter).toBe(0);
 
-        let ts2: Hlc;
         state = Hlc.tick(state, () => 1_000);
-        ts2 = state;
+        const ts2: Hlc = state;
         expect(ts2.timestamp).toBe(1_000);
         expect(ts2.counter).toBe(ts1.counter + 1);
 
