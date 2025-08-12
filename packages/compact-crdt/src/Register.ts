@@ -1,29 +1,20 @@
 import { Hlc } from "@bobbyfidz/hlc";
-import { VersionVector } from "./VersionVector.js";
-import type { RegisterLeaf } from "./types.js";
 
-export function createRegister<T>(value: T, write: HlcType, vv?: VV): RegisterLeaf<T> {
-    let dots: VV = vv ? { ...vv } : {};
-    dots = VersionVector.mergeDot(dots, write);
-    return { type: "register", value, dots };
+export interface Register<T = unknown> {
+    type: "register";
+    value: T;
+    dot: Hlc;
 }
 
-export function setRegister<T>(reg: RegisterLeaf<T>, value: T, dot: HlcType): RegisterLeaf<T> {
-    const current = maxDot(reg.dots);
-    if (!current || Hlc.compare(dot, current) >= 0) {
-        let dots = { ...reg.dots } as VV;
-        dots = VersionVector.mergeDot(dots, dot);
-        return { type: "register", value, dots };
+function create<T>(value: T, write: Hlc): Register<T> {
+    return { type: "register", value, dot: write };
+}
+
+function set<T>(register: Register<T>, value: T, dot: Hlc): Register<T> {
+    if (Hlc.compare(dot, register.dot) >= 0) {
+        return { type: "register", value, dot };
     }
-    let dots = { ...reg.dots } as VV;
-    dots = VersionVector.mergeDot(dots, dot);
-    return { ...reg, dots };
+    return register;
 }
 
-export function maxDot(vv: VV): HlcType | undefined {
-    let best: HlcType | undefined;
-    for (const d of Object.values(vv)) {
-        if (!best || Hlc.compare(d, best) > 0) best = d;
-    }
-    return best;
-}
+export const Register = { create, set };

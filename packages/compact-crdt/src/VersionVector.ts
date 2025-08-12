@@ -3,13 +3,13 @@ import { Hlc } from "@bobbyfidz/hlc";
 // A version vector stores the latest HLC seen by each peer.
 export type VersionVector = Record<string, Hlc>;
 
-export function contains(a: VersionVector, dot: Hlc): boolean {
+function contains(a: VersionVector, dot: Hlc): boolean {
     const aDot = a[dot.nodeId];
     if (!aDot) return false;
     return Hlc.compare(aDot, dot) >= 0;
 }
 
-export function compare(a: VersionVector, b: VersionVector): number | undefined {
+function compare(a: VersionVector, b: VersionVector): number | undefined {
     const peerIds = Array.from(new Set([...Object.keys(a), ...Object.keys(b)]));
     let aHasGreaterDot = false;
     let bHasGreaterDot = false;
@@ -33,7 +33,7 @@ export function compare(a: VersionVector, b: VersionVector): number | undefined 
     return 0;
 }
 
-export function merge(a: VersionVector, b: VersionVector): VersionVector {
+function merge(a: VersionVector, b: VersionVector): VersionVector {
     const out: VersionVector = { ...a };
     for (const [peerId, dot] of Object.entries(b)) {
         const prev = out[peerId];
@@ -42,11 +42,10 @@ export function merge(a: VersionVector, b: VersionVector): VersionVector {
     return out;
 }
 
-export function mergeDot(into: VersionVector, dot: Hlc): VersionVector {
+function mergeDot(into: VersionVector, dot: Hlc): VersionVector {
     const prev = into[dot.nodeId];
     if (!prev || Hlc.compare(dot, prev) > 0) return { ...into, [dot.nodeId]: dot };
     return into;
 }
 
 export const VersionVector = { contains, compare, merge, mergeDot };
-export { merge as vvMerge };
