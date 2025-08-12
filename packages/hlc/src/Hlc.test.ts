@@ -1,16 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { Hlc } from "./index.js";
 
-function makeNow(times: [number, ...number[]]): () => number {
-    let i = 0;
-    return () => {
-        const idx = i < times.length ? i : times.length - 1;
-        const t = times[idx]!;
-        i += 1;
-        return t;
-    };
-}
-
 describe("HLC", () => {
     test("tick generates increasing counters within same timestamp", () => {
         let state = Hlc.create("nodeA", 0);
