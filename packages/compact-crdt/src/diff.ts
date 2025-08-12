@@ -1,9 +1,9 @@
 import { Hlc } from "@bobbyfidz/hlc";
-import type { VersionVector } from "./VersionVector.js";
-import { contains, merge, mergeDot } from "./VersionVector.js";
-import type { DocumentRoot, MapNode } from "./Map.js";
 import { deriveVersionVector } from "./Map.js";
+import { VersionVector as VV } from "./VersionVector.js";
+import type { DocumentRoot, Map, MapEntry } from "./Map.js";
 import type { Register as RegisterLeaf } from "./Register.js";
+import type { VersionVector } from "./VersionVector.js";
 
 export type DiffOp =
     | {
@@ -27,11 +27,11 @@ export interface DiffEnvelope {
     ops: DiffOp[];
 }
 
-function walkForDiff(node: MapNode, path: string[], remoteVV: VersionVector, ops: DiffOp[]): void {
+function walkForDiff(node: Map, path: string[], remoteVV: VersionVector, ops: DiffOp[]): void {
     // If node's dots are all seen by remote, skip whole subtree
     let allSeen = true;
     for (const dot of Object.values(node.dots)) {
-        if (!contains(remoteVV, dot)) {
+        if (!VV.contains(remoteVV, dot)) {
             allSeen = false;
             break;
         }
@@ -39,23 +39,24 @@ function walkForDiff(node: MapNode, path: string[], remoteVV: VersionVector, ops
     if (allSeen) return;
 
     // Dive into entries
-    for (const [key, entry] of Object.entries(node.entries)) {
+    for (const [key, raw] of Object.entries(node.entries)) {
+        const entry = raw as MapEntry;
         if (entry.type === "register") {
             const reg = entry as RegisterLeaf;
-            if (!contains(remoteVV, reg.dot)) {
+            if (!VV.contains(remoteVV, reg.dot)) {
                 ops.push({ op: "set_register", path: [...path, key], value: reg.value, write: reg.dot });
             }
         } else {
-            walkForDiff(entry as MapNode, [...path, key], remoteVV, ops);
+            walkForDiff(entry as Map, [...path, key], remoteVV, ops);
         }
     }
 
     // Emit per-key removes when tombstones not seen by remote
-    if (node.removed) {
-        for (const [key, vv] of Object.entries(node.removed)) {
+    if (node.tombstones) {
+        for (const [key, vv] of Object.entries(node.tombstones)) {
             let unseen = false;
             for (const dot of Object.values(vv)) {
-                if (!contains(remoteVV, dot)) {
+                if (!VV.contains(remoteVV, dot)) {
                     unseen = true;
                     break;
                 }
@@ -78,21 +79,27 @@ export function applyDiff(doc: DocumentRoot, diff: DiffEnvelope): DocumentRoot {
     for (const op of diff.ops) {
         if (op.op === "set_register") {
             // Walk/create parents
-            let node: MapNode = doc;
+            let node: Map = doc;
             const path = op.path.slice(0, -1);
             for (const key of path) {
-                let child = node.entries[key];
-                if (!child || child.type !== "map") {
-                    child = { type: "map", dots: {}, entries: {} } as MapNode;
-                    node.entries[key] = child;
+                const candidate = node.entries[key];
+                if (!candidate || candidate.type !== "map") {
+                    const created: Map = { type: "map", dots: {}, entries: {} };
+                    node.entries[key] = created;
+                    node = created;
+                } else {
+                    node = candidate;
                 }
-                node = child as MapNode;
-                mergeDot(node.dots, op.write);
+                node.dots = VV.mergeDot(node.dots, op.write);
             }
-            const leafKey = op.path[op.path.length - 1] as string;
+            const leafKey = op.path[op.path.length - 1]!;
             const existing = node.entries[leafKey];
             // Add-wins: only suppress if key's tombstone covers write
-            if (node.removed && node.removed[leafKey] && contains(node.removed[leafKey]!, op.write)) {
+            if (
+                node.tombstones &&
+                node.tombstones[leafKey] &&
+                VV.contains(node.tombstones[leafKey], op.write)
+            ) {
                 continue;
             }
             if (!existing || existing.type !== "register") {
@@ -109,14 +116,14 @@ export function applyDiff(doc: DocumentRoot, diff: DiffEnvelope): DocumentRoot {
                 }
             }
         } else if (op.op === "remove_key") {
-            let node: MapNode = doc;
+            let node: Map = doc;
             for (const key of op.path) {
                 const child = node.entries[key];
                 if (!child || child.type !== "map") break;
-                node = child as MapNode;
+                node = child;
             }
-            node.removed = node.removed ?? {};
-            node.removed[op.key] = merge(node.removed[op.key] ?? {}, op.removeVV);
+            node.tombstones = node.tombstones ?? {};
+            node.tombstones[op.key] = VV.merge(node.tombstones[op.key] ?? {}, op.removeVV);
             delete node.entries[op.key];
         }
     }

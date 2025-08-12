@@ -18,8 +18,7 @@
     },
     "dependencies": {
         "@bobbyfidz/hlc": "workspace:*",
-        "@bobbyfidz/panic": "workspace:*",
-        "cborg": "^4.2.3"
+        "@bobbyfidz/panic": "workspace:*"
     },
     "devDependencies": {
         "@bobbyfidz/universal-build-config": "workspace:*",

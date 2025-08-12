@@ -1,113 +1,98 @@
-import type { Hlc as HlcType } from "@bobbyfidz/hlc";
-import type { VersionVector as VersionVectorType } from "./VersionVector.js";
-import { VersionVector } from "./VersionVector.js";
-import type { Register as RegisterLeaf } from "./Register.js";
+import { Hlc } from "@bobbyfidz/hlc";
+import { unreachable } from "@bobbyfidz/panic";
 import { Register } from "./Register.js";
+import { VersionVector } from "./VersionVector.js";
 
-export interface MapNode {
+export interface Map {
     type: "map";
     entries: Record<string, MapEntry>;
-    // Node-level dots: summarize latest edits that affected this subtree
-    dots: VersionVectorType;
-    // Add-wins tombstones per key: a remove is represented by a summary of dots seen at remove time
-    removed?: Record<string, VersionVectorType>;
+    tombstones?: Record<string, VersionVector>;
+    dots: VersionVector;
 }
 
-export type MapEntry = MapNode | RegisterLeaf<unknown>;
+export type MapEntry = Map | Register<unknown>;
 
-export type DocumentRoot = MapNode;
-
-export function createEmpty(actorId: string, now: HlcType): DocumentRoot {
+function create(peerId: string, now: Hlc): Map {
     return {
         type: "map",
         entries: {},
-        dots: { [actorId]: now },
+        dots: { [peerId]: now },
     };
 }
 
-function touchNode(node: MapNode, dot: HlcType): void {
+function touchNode(node: Map, dot: Hlc): void {
     node.dots = VersionVector.mergeDot(node.dots, dot);
 }
 
-function ensureParentPath(root: DocumentRoot, path: string[], dot: HlcType): MapNode {
-    let node: MapNode = root;
+function ensurePath(root: Map, path: string[], dot: Hlc): Map {
+    let node: Map = root;
     for (const key of path) {
         const child = node.entries[key];
         if (!child || child.type !== "map") {
-            const created: MapNode = { type: "map", entries: {}, dots: {} };
-            touchNode(created, dot);
-            node.entries[key] = created;
-            node = created;
+            const newEntry: Map = { type: "map", entries: {}, dots: {} };
+            touchNode(newEntry, dot);
+            node.entries[key] = newEntry;
+            node = newEntry;
         } else {
-            const mapChild = child as MapNode;
-            touchNode(mapChild, dot);
-            node = mapChild;
+            touchNode(child, dot);
+            node = child;
         }
     }
     return node;
 }
 
-export function setAtPath<T>(
-    root: DocumentRoot,
-    path: [string, ...string[]],
-    value: T,
-    dot: HlcType
-): DocumentRoot {
-    const parent = ensureParentPath(root, path.slice(0, -1), dot);
+function setAtPath<T>(root: Map, path: [string, ...string[]], value: T, dot: Hlc): void {
+    const parent = ensurePath(root, path.slice(0, -1), dot);
     const key = path[path.length - 1] as string;
-    const existing = parent.entries[key];
-    if (!existing || existing.type !== "register") {
+    const existingEntry = parent.entries[key];
+    // This is a little sus, but later we can enforce schemas?
+    if (!existingEntry || existingEntry.type !== "register") {
         parent.entries[key] = Register.create(value, dot);
     } else {
-        parent.entries[key] = Register.set(existing as RegisterLeaf<T>, value, dot);
+        parent.entries[key] = Register.set(existingEntry, value, dot);
     }
     touchNode(root, dot);
-    return root;
 }
 
-export function removeAtPath(
-    root: DocumentRoot,
-    path: [string, ...string[]],
-    removeSummary: VersionVectorType
-): DocumentRoot {
-    // Use any dot from the summary to touch ancestors
-    const anyDot = Object.values(removeSummary)[0] ?? Object.values(root.dots)[0]!;
-    const parent = ensureParentPath(root, path.slice(0, -1), anyDot);
+function removeAtPath(root: Map, path: [string, ...string[]], removeSummary: VersionVector): Map {
+    // Touch ancestors with the ENTIRE remove summary (merge each dot), so diffs won't prune the subtree prematurely
+    const parentPath = path.slice(0, -1);
+    let node = root;
+    for (const key of parentPath) {
+        let child = node.entries[key];
+        if (!child || child.type !== "map") {
+            child = { type: "map", entries: {}, dots: {} };
+            node.entries[key] = child;
+        }
+        // Merge full summary into ancestor dots (single merge of all actors)
+        node.dots = VersionVector.merge(node.dots, removeSummary);
+        node = child;
+    }
+    const parent = node;
     const key = path[path.length - 1] as string;
-    parent.removed = parent.removed ?? {};
-    parent.removed[key] = parent.removed[key]
-        ? VersionVector.merge(parent.removed[key] as VersionVectorType, removeSummary)
+    parent.tombstones = parent.tombstones ?? {};
+    parent.tombstones[key] = parent.tombstones[key]
+        ? VersionVector.merge(parent.tombstones[key], removeSummary)
         : { ...removeSummary };
     delete parent.entries[key];
     return root;
 }
 
-export function deriveVersionVector(root: DocumentRoot): VersionVectorType {
-    const vv: VersionVectorType = {};
-    function visit(entry: MapEntry): void {
-        if ((entry as any).type === "register") {
-            const reg = entry as RegisterLeaf<unknown>;
-            Object.assign(vv, VersionVector.merge(vv, { [reg.dot.nodeId]: reg.dot }));
-            return;
+function getVersionVector(root: Map): VersionVector {
+    return Object.values(root.entries).reduce((versionVector, entry) => {
+        if (entry.type === "register") {
+            return VersionVector.merge(versionVector, Register.getVersionVector(entry));
+        } else if (entry.type === "map") {
+            return VersionVector.merge(versionVector, getVersionVector(entry));
+        } else {
+            unreachable(entry);
         }
-        const node = entry as MapNode;
-        for (const dot of Object.values(node.dots)) {
-            Object.assign(vv, VersionVector.merge(vv, { [dot.nodeId]: dot }));
-        }
-        for (const child of Object.values(node.entries)) visit(child);
-    }
-    visit(root);
-    return vv;
+    }, {} as VersionVector);
 }
 
-export function shouldSuppressByRemove(parent: MapNode, key: string, actorDot: HlcType): boolean {
-    const tomb = parent.removed?.[key];
-    if (!tomb) return false;
-    return VersionVector.contains(tomb, actorDot);
-}
-
-export function upsertMap(root: DocumentRoot, path: string[], dot: HlcType): DocumentRoot {
-    ensureParentPath(root, path, dot);
-    touchNode(root, dot);
-    return root;
-}
+export const Map = {
+    create,
+    setAtPath,
+    removeAtPath,
+    getVersionVector,
+};

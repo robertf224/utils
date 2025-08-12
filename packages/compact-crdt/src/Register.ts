@@ -1,4 +1,5 @@
 import { Hlc } from "@bobbyfidz/hlc";
+import { VersionVector } from "./VersionVector.js";
 
 export interface Register<T = unknown> {
     type: "register";
@@ -17,4 +18,8 @@ function set<T>(register: Register<T>, value: T, dot: Hlc): Register<T> {
     return register;
 }
 
-export const Register = { create, set };
+function getVersionVector(register: Register): VersionVector {
+    return { [register.dot.nodeId]: register.dot };
+}
+
+export const Register = { create, set, getVersionVector };

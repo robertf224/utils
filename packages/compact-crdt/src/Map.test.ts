@@ -1,32 +1,33 @@
 import { Hlc } from "@bobbyfidz/hlc";
 import { describe, expect, test } from "vitest";
-import { createEmpty, setAtPath, removeAtPath, makeDiff, applyDiff, deriveVersionVector } from "./index.js";
+import { applyDiff, makeDiff } from "./diff.js";
+import { Map } from "./Map.js";
 
 describe("add-wins removes", () => {
     test("new add after remove is accepted", () => {
-        let a = Hlc.create("A", 0);
-        const b = Hlc.create("B", 0);
-        const docA = createEmpty(
+        let a = Hlc.create("A");
+        const b = Hlc.create("B");
+        const docA = Map.create(
             "A",
             Hlc.tick(a, () => 1)
         );
-        const docB = createEmpty(
+        const docB = Map.create(
             "B",
             Hlc.tick(b, () => 1)
         );
 
         a = Hlc.tick(a, () => 2);
-        setAtPath(docA, ["user", "name"], "Alice", a);
+        Map.setAtPath(docA, ["user", "name"], "Alice", a);
 
         // B removes specific key at its current vv
-        const vvB = deriveVersionVector(docB);
-        removeAtPath(docB, ["user", "name"], vvB);
+        const vvB = Map.getVersionVector(docB);
+        Map.removeAtPath(docB, ["user", "name"], vvB);
 
         // A writes later
         a = Hlc.tick(a, () => 3);
-        setAtPath(docA, ["user", "name"], "Alice Cooper", a);
+        Map.setAtPath(docA, ["user", "name"], "Alice Cooper", a);
 
-        applyDiff(docB, makeDiff(docA, deriveVersionVector(docB)));
+        applyDiff(docB, makeDiff(docA, Map.getVersionVector(docB)));
 
         const user = docB.entries["user"] as { entries: Record<string, { value: string } | undefined> };
         const regB = user.entries["name"]!;
@@ -36,26 +37,26 @@ describe("add-wins removes", () => {
     test("remove individual key propagates", () => {
         let a = Hlc.create("A", 0);
         const b = Hlc.create("B", 0);
-        const docA = createEmpty(
+        const docA = Map.create(
             "A",
             Hlc.tick(a, () => 1)
         );
-        const docB = createEmpty(
+        const docB = Map.create(
             "B",
             Hlc.tick(b, () => 1)
         );
 
         a = Hlc.tick(a, () => 2);
-        setAtPath(docA, ["user", "name"], "Alice", a);
-        applyDiff(docB, makeDiff(docA, deriveVersionVector(docB)));
+        Map.setAtPath(docA, ["user", "name"], "Alice", a);
+        applyDiff(docB, makeDiff(docA, Map.getVersionVector(docB)));
         {
             const user = docB.entries["user"] as { entries: Record<string, { value: string } | undefined> };
             expect(user.entries["name"]!.value).toBe("Alice");
         }
 
-        const vvB = deriveVersionVector(docB);
-        removeAtPath(docB, ["user", "name"], vvB);
-        applyDiff(docA, makeDiff(docB, deriveVersionVector(docA)));
+        const vvB = Map.getVersionVector(docB);
+        Map.removeAtPath(docB, ["user", "name"], vvB);
+        applyDiff(docA, makeDiff(docB, Map.getVersionVector(docA)));
         {
             const userA = docA.entries["user"] as { entries: Record<string, unknown> };
             expect(userA.entries["name"]).toBeUndefined();
