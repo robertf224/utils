@@ -66,9 +66,9 @@ function parse(raw: string): Hlc {
 
 export const Hlc = {
     create,
+    compare,
     tick,
     merge,
-    compare,
     toString,
     parse,
 };
