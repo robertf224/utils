@@ -1,18 +1,9 @@
 import { Hlc } from "@bobbyfidz/hlc";
-import type {
-    DiffEnvelope,
-    DiffOp,
-    DocumentRoot,
-    MapEntry,
-    MapNode,
-    RegisterLeaf,
-    CounterLeaf,
-} from "./types.js";
 import type { VersionVector } from "./VersionVector.js";
-import type { Hlc as HlcType } from "@bobbyfidz/hlc";
+import { contains, merge, mergeDot } from "./VersionVector.js";
+import type { DocumentRoot, MapNode } from "./Map.js";
 import { deriveVersionVector } from "./Map.js";
-import { maxDot } from "./Register.js";
-import { vvMerge, contains, mergeDot } from "./versionVector.js";
+import type { Register as RegisterLeaf } from "./Register.js";
 
 export type DiffOp =
     | {
@@ -28,14 +19,6 @@ export type DiffOp =
           path: string[]; // path to parent map
           key: string; // key removed
           removeVV: VersionVector; // summary at remove time
-      }
-    | {
-          op: "counter_update";
-          path: string[]; // keys from root to counter leaf
-          actor: ActorId;
-          p: number;
-          n: number;
-          dot: Hlc; // actor's latest counter dot
       };
 
 export interface DiffEnvelope {
@@ -61,23 +44,6 @@ function walkForDiff(node: MapNode, path: string[], remoteVV: VersionVector, ops
             const reg = entry as RegisterLeaf;
             if (!contains(remoteVV, reg.dot)) {
                 ops.push({ op: "set_register", path: [...path, key], value: reg.value, write: reg.dot });
-            }
-        } else if (entry.type === "counter") {
-            const ctr = entry as CounterLeaf;
-            // For each actor contribution unseen by remote, emit an update
-            for (const [actor, dot] of Object.entries(ctr.actorDots)) {
-                if (!contains(remoteVV, dot)) {
-                    const p = ctr.p[actor as string] ?? 0;
-                    const n = ctr.n[actor as string] ?? 0;
-                    ops.push({
-                        op: "counter_update",
-                        path: [...path, key],
-                        actor: actor as string,
-                        p,
-                        n,
-                        dot,
-                    });
-                }
             }
         } else {
             walkForDiff(entry as MapNode, [...path, key], remoteVV, ops);
@@ -150,41 +116,8 @@ export function applyDiff(doc: DocumentRoot, diff: DiffEnvelope): DocumentRoot {
                 node = child as MapNode;
             }
             node.removed = node.removed ?? {};
-            node.removed[op.key] = vvMerge(node.removed[op.key] ?? {}, op.removeVV);
+            node.removed[op.key] = merge(node.removed[op.key] ?? {}, op.removeVV);
             delete node.entries[op.key];
-        } else if (op.op === "counter_update") {
-            // Walk/create parents
-            let node: MapNode = doc;
-            const path = op.path.slice(0, -1);
-            for (const key of path) {
-                let child = node.entries[key];
-                if (!child || child.type !== "map") {
-                    child = { type: "map", dots: {}, entries: {} } as MapNode;
-                    node.entries[key] = child;
-                }
-                node = child as MapNode;
-                mergeDot(node.dots, op.dot);
-            }
-            const leafKey = op.path[op.path.length - 1] as string;
-            const existing = node.entries[leafKey];
-            if (node.removed && node.removed[leafKey] && contains(node.removed[leafKey]!, op.dot)) continue; // suppressed by remove
-            if (!existing || existing.type !== "counter") {
-                // create counter leaf with actor contribution
-                node.entries[leafKey] = {
-                    type: "counter",
-                    p: op.p ? { [op.actor]: op.p } : {},
-                    n: op.n ? { [op.actor]: op.n } : {},
-                    actorDots: { [op.actor]: op.dot },
-                    dots: { [op.actor]: op.dot },
-                } as CounterLeaf;
-            } else {
-                const ctr = existing as CounterLeaf;
-                // take maxima per-actor to ensure idempotence
-                ctr.p[op.actor] = Math.max(ctr.p[op.actor] ?? 0, op.p);
-                ctr.n[op.actor] = Math.max(ctr.n[op.actor] ?? 0, op.n);
-                ctr.actorDots[op.actor] = op.dot;
-                mergeDot(ctr.dots, op.dot);
-            }
         }
     }
     return doc;
