@@ -1,9 +1,9 @@
-import { describe, expect, test } from "vitest";
 import { Hlc } from "@bobbyfidz/hlc";
+import { describe, expect, test } from "vitest";
+import { applyDiff, diff } from "./diff.js";
 import { Map } from "./Map.js";
-import { applyDiff, makeDiff } from "./diff.js";
 
-describe("compact-crdt", () => {
+describe("diff", () => {
     test("register set diff/apply roundtrip (add-wins)", () => {
         let a = Hlc.create("A", 0);
         let b = Hlc.create("B", 0);
@@ -13,7 +13,7 @@ describe("compact-crdt", () => {
         Map.setAtPath(docA, ["user", "name"], "Alice", a);
 
         const docB = Map.create();
-        const diffToB = makeDiff(docA, Map.getVersionVector(docB));
+        const diffToB = diff(docA, Map.getVersionVector(docB));
         applyDiff(docB, diffToB);
 
         // After one-way sync, both should materialize the same
@@ -25,7 +25,7 @@ describe("compact-crdt", () => {
 
         a = Hlc.tick(a, () => 3);
         Map.setAtPath(docA, ["user", "name"], "Alice Cooper", a);
-        const diff2 = makeDiff(docA, Map.getVersionVector(docB));
+        const diff2 = diff(docA, Map.getVersionVector(docB));
         applyDiff(docB, diff2);
 
         const out = Map.materialize(docB) as { user?: { name?: string } };

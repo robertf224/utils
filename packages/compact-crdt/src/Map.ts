@@ -44,9 +44,13 @@ function setAtPath<T>(root: Map, path: [string, ...string[]], value: T, dot: Hlc
         parent.entries[key] = Register.set(existingEntry, value, dot);
     }
 }
-
-function removeAtPath(root: Map, path: [string, ...string[]], dot: Hlc): void {
-    const versionVector = VersionVector.mergeDot(getVersionVector(root), dot);
+function removeAtPath(root: Map, path: [string, ...string[]], dot: Hlc): void;
+function removeAtPath(root: Map, path: [string, ...string[]], versionVector: VersionVector): void;
+function removeAtPath(root: Map, path: [string, ...string[]], dotOrVersionVector: Hlc | VersionVector): void {
+    if ("nodeId" in dotOrVersionVector) {
+        dotOrVersionVector = VersionVector.mergeDot(getVersionVector(root), dotOrVersionVector as Hlc);
+    }
+    const versionVector = dotOrVersionVector;
     const parent = ensurePath(root, path.slice(0, -1));
     const key = path[path.length - 1] as string;
 
