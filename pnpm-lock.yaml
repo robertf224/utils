@@ -95,7 +95,7 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1(@types/node@20.17.30)(jiti@2.4.2)(jsdom@26.1.0)(yaml@2.7.1)
 
-  packages/compact-crdt:
+  packages/crdt:
     dependencies:
       '@bobbyfidz/hlc':
         specifier: workspace:*
