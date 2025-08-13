@@ -6,9 +6,9 @@ export interface Hlc {
     nodeId: string;
 }
 
-function create(nodeId: string, timestamp?: number): Hlc {
+function create(nodeId: string, timestamp: number = Date.now()): Hlc {
     return {
-        timestamp: timestamp ?? Date.now(),
+        timestamp,
         counter: 0,
         nodeId,
     };
@@ -66,9 +66,9 @@ function parse(raw: string): Hlc {
 
 export const Hlc = {
     create,
+    compare,
     tick,
     merge,
-    compare,
     toString,
     parse,
 };

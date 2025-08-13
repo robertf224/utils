@@ -95,6 +95,28 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1(@types/node@20.17.30)(jiti@2.4.2)(jsdom@26.1.0)(yaml@2.7.1)
 
+  packages/crdt:
+    dependencies:
+      '@bobbyfidz/hlc':
+        specifier: workspace:*
+        version: link:../hlc
+      '@bobbyfidz/panic':
+        specifier: workspace:*
+        version: link:../panic
+    devDependencies:
+      '@bobbyfidz/universal-build-config':
+        specifier: workspace:*
+        version: link:../universal-build-config
+      eslint:
+        specifier: ^9.21.0
+        version: 9.24.0(jiti@2.4.2)
+      typescript:
+        specifier: ~5.8.2
+        version: 5.8.3
+      vitest:
+        specifier: ^3.1.1
+        version: 3.1.1(@types/node@20.17.30)(jiti@2.4.2)(jsdom@26.1.0)(yaml@2.7.1)
+
   packages/hlc:
     dependencies:
       '@bobbyfidz/panic':
