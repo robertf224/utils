@@ -33,6 +33,11 @@ function compare(a: VersionVector, b: VersionVector): number | undefined {
     return 0;
 }
 
+function isConcurrentOrAfter(a: VersionVector, b: VersionVector): boolean {
+    const comparison = compare(a, b);
+    return comparison === undefined || comparison > 0;
+}
+
 function merge(a: VersionVector, b: VersionVector): VersionVector {
     const out: VersionVector = { ...a };
     for (const [peerId, dot] of Object.entries(b)) {
@@ -48,4 +53,4 @@ function mergeDot(into: VersionVector, dot: Hlc): VersionVector {
     return into;
 }
 
-export const VersionVector = { contains, compare, merge, mergeDot };
+export const VersionVector = { contains, compare, isConcurrentOrAfter, merge, mergeDot };
