@@ -1,61 +1,34 @@
 import { describe, expect, test } from "vitest";
 import { Hlc } from "@bobbyfidz/hlc";
-import {
-    applyDiff,
-    createEmpty,
-    deriveVersionVector,
-    makeDiff,
-    setAtPath,
-    encodeDiff,
-    decodeDiff,
-    removeAtPath,
-    vvCompareCoverage,
-} from "./index.js";
+import { Map } from "./Map.js";
+import { applyDiff, makeDiff } from "./diff.js";
 
 describe("compact-crdt", () => {
     test("register set diff/apply roundtrip (add-wins)", () => {
-        const nodeA = Hlc.create("A", 0);
-        const nodeB = Hlc.create("B", 0);
+        let a = Hlc.create("A", 0);
+        let b = Hlc.create("B", 0);
 
-        const docA = createEmpty(
-            "A",
-            Hlc.tick(nodeA, () => 1)
-        );
-        setAtPath(
-            docA,
-            ["user", "name"],
-            "Alice",
-            Hlc.tick(nodeA, () => 2)
-        );
-        const vvA1 = deriveVersionVector(docA);
+        const docA = Map.create();
+        a = Hlc.tick(a, () => 1);
+        Map.setAtPath(docA, ["user", "name"], "Alice", a);
 
-        const docB = createEmpty(
-            "B",
-            Hlc.tick(nodeB, () => 1)
-        );
-        const diffToB = makeDiff(docA, deriveVersionVector(docB));
-        const recv = decodeDiff(encodeDiff(diffToB));
-        applyDiff(docB, recv);
+        const docB = Map.create();
+        const diffToB = makeDiff(docA, Map.getVersionVector(docB));
+        applyDiff(docB, diffToB);
 
-        // After one-way sync, B's VV should cover A's (B has additional root dot from its own actor)
-        expect(vvCompareCoverage(deriveVersionVector(docB), deriveVersionVector(docA))).toBe("covers");
+        // After one-way sync, both should materialize the same
+        expect(Map.materialize(docB)).toEqual(Map.materialize(docA));
 
         // Concurrent: B removes parent, A sets nested again -> add should win if newer than remove summary seen
-        // simulate remove by recording vv
-        const vvB = deriveVersionVector(docB);
-        removeAtPath(docB, ["user"], vvB);
+        b = Hlc.tick(b, () => 2);
+        Map.removeAtPath(docB, ["user"], b);
 
-        setAtPath(
-            docA,
-            ["user", "name"],
-            "Alice Cooper",
-            Hlc.tick(nodeA, () => 3)
-        );
-        const diff2 = makeDiff(docA, deriveVersionVector(docB));
+        a = Hlc.tick(a, () => 3);
+        Map.setAtPath(docA, ["user", "name"], "Alice Cooper", a);
+        const diff2 = makeDiff(docA, Map.getVersionVector(docB));
         applyDiff(docB, diff2);
 
-        // Expect B to accept the newer write
-        const regB = (docB.entries["user"] as any).entries["name"] as any;
-        expect(regB.value).toBe("Alice Cooper");
+        const out = Map.materialize(docB) as { user?: { name?: string } };
+        expect(out.user?.name).toBe("Alice Cooper");
     });
 });
