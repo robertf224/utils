@@ -4,7 +4,7 @@ import { Hlc } from "@bobbyfidz/hlc";
 export type VersionVector = Record<string, Hlc>;
 
 function contains(a: VersionVector, dot: Hlc): boolean {
-    const aDot = a[dot.nodeId];
+    const aDot = a[dot.actorId];
     if (!aDot) return false;
     return Hlc.compare(aDot, dot) >= 0;
 }
@@ -48,8 +48,8 @@ function merge(a: VersionVector, b: VersionVector): VersionVector {
 }
 
 function mergeDot(into: VersionVector, dot: Hlc): VersionVector {
-    const prev = into[dot.nodeId];
-    if (!prev || Hlc.compare(dot, prev) > 0) return { ...into, [dot.nodeId]: dot };
+    const prev = into[dot.actorId];
+    if (!prev || Hlc.compare(dot, prev) > 0) return { ...into, [dot.actorId]: dot };
     return into;
 }
 

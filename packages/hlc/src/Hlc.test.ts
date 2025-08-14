@@ -25,7 +25,7 @@ describe("HLC", () => {
 
         state = Hlc.tick(state, () => 100);
 
-        const remote: Hlc = { timestamp: 200, counter: 3, nodeId: "remote" };
+        const remote: Hlc = { timestamp: 200, counter: 3, actorId: "remote" };
         const ts = Hlc.merge(state, remote, () => 150);
         const newState = ts;
 
@@ -40,7 +40,7 @@ describe("HLC", () => {
         state = Hlc.tick(state, () => 500);
         state = Hlc.tick(state, () => 500); // counter becomes 1
 
-        const remote: Hlc = { timestamp: 500, counter: 0, nodeId: "r" };
+        const remote: Hlc = { timestamp: 500, counter: 0, actorId: "r" };
         const ts = Hlc.merge(state, remote, () => 500);
         const newState = ts;
         expect(ts.timestamp).toBe(500);
@@ -48,16 +48,16 @@ describe("HLC", () => {
         expect(newState.counter).toBe(2);
     });
 
-    test("compare provides total ordering with nodeId as tie-breaker", () => {
-        const a: Hlc = { timestamp: 10, counter: 0, nodeId: "A" };
-        const b: Hlc = { timestamp: 10, counter: 0, nodeId: "B" };
+    test("compare provides total ordering with actorId as tie-breaker", () => {
+        const a: Hlc = { timestamp: 10, counter: 0, actorId: "A" };
+        const b: Hlc = { timestamp: 10, counter: 0, actorId: "B" };
         expect(Math.sign(Hlc.compare(a, b))).toBe(-1);
         expect(Math.sign(Hlc.compare(b, a))).toBe(1);
         expect(Math.sign(Hlc.compare(a, a))).toBe(0);
     });
 
     test("string encode/parse roundtrip is lossless and safe for ids with separators", () => {
-        const ts: Hlc = { timestamp: 123, counter: 4, nodeId: "node:id/with?chars-α" };
+        const ts: Hlc = { timestamp: 123, counter: 4, actorId: "node:id/with?chars-α" };
         const encoded = Hlc.toString(ts);
         const decoded = Hlc.parse(encoded);
         expect(decoded).toEqual(ts);

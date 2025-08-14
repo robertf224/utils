@@ -21,15 +21,15 @@ describe("Register", () => {
         expect(reg.value).toBe("v2");
         expect(reg.dot).toEqual(newer);
 
-        const older = { timestamp: 999, counter: 0, nodeId: "A" } as const;
+        const older = { timestamp: 999, counter: 0, actorId: "A" } as const;
         const reg2 = Register.set(reg, "v3", older);
         expect(reg2.value).toBe("v2");
         expect(reg2.dot).toEqual(newer);
     });
 
-    test("tie-break with nodeId when ts and counter equal", () => {
-        const a = { timestamp: 1000, counter: 0, nodeId: "A" } as const;
-        const b = { timestamp: 1000, counter: 0, nodeId: "B" } as const;
+    test("tie-break with actorId when ts and counter equal", () => {
+        const a = { timestamp: 1000, counter: 0, actorId: "A" } as const;
+        const b = { timestamp: 1000, counter: 0, actorId: "B" } as const;
         let reg = Register.create("fromA", a);
         reg = Register.set(reg, "fromB", b);
         expect(reg.value).toBe("fromB");

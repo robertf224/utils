@@ -19,7 +19,7 @@ function set<T>(register: Register<T>, value: T, dot: Hlc): Register<T> {
 }
 
 function getVersionVector(register: Register): VersionVector {
-    return { [register.dot.nodeId]: register.dot };
+    return { [register.dot.actorId]: register.dot };
 }
 
 export const Register = { create, set, getVersionVector };
