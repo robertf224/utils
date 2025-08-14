@@ -3,24 +3,24 @@ import { invariant } from "@bobbyfidz/panic";
 export interface Hlc {
     timestamp: number;
     counter: number;
-    nodeId: string;
+    actorId: string;
 }
 
-function create(nodeId: string, timestamp: number = Date.now()): Hlc {
+function create(actorId: string, timestamp: number = Date.now()): Hlc {
     return {
         timestamp,
         counter: 0,
-        nodeId,
+        actorId,
     };
 }
 
 function compare(a: Hlc, b: Hlc): number {
     if (a.timestamp == b.timestamp) {
         if (a.counter === b.counter) {
-            if (a.nodeId === b.nodeId) {
+            if (a.actorId === b.actorId) {
                 return 0;
             }
-            return a.nodeId < b.nodeId ? -1 : 1;
+            return a.actorId < b.actorId ? -1 : 1;
         }
         return a.counter - b.counter;
     }
@@ -51,16 +51,16 @@ function merge(state: Hlc, remote: Hlc, now: () => number = Date.now): Hlc {
 }
 
 function toString(state: Hlc): string {
-    return `${state.timestamp.toString().padStart(15, "0")}:${state.counter.toString(36).padStart(5, "0")}:${state.nodeId}`;
+    return `${state.timestamp.toString().padStart(15, "0")}:${state.counter.toString(36).padStart(5, "0")}:${state.actorId}`;
 }
 
 function parse(raw: string): Hlc {
-    const [timestamp, counter, ...nodeId] = raw.split(":");
-    invariant(timestamp && counter && nodeId.length > 0, "Invalid HLC string.");
+    const [timestamp, counter, ...actorId] = raw.split(":");
+    invariant(timestamp && counter && actorId.length > 0, "Invalid HLC string.");
     return {
         timestamp: parseInt(timestamp),
         counter: parseInt(counter, 36),
-        nodeId: nodeId.join(":"),
+        actorId: actorId.join(":"),
     };
 }
 

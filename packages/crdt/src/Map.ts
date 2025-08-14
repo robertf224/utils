@@ -47,11 +47,12 @@ function setAtPath<T>(root: Map, path: [string, ...string[]], value: T, dot: Hlc
 function removeAtPath(root: Map, path: [string, ...string[]], dot: Hlc): void;
 function removeAtPath(root: Map, path: [string, ...string[]], versionVector: VersionVector): void;
 function removeAtPath(root: Map, path: [string, ...string[]], dotOrVersionVector: Hlc | VersionVector): void {
-    if ("nodeId" in dotOrVersionVector) {
-        dotOrVersionVector = VersionVector.mergeDot(getVersionVector(root), dotOrVersionVector as Hlc);
+    const parent = ensurePath(root, path.slice(0, -1));
+    if ("actorId" in dotOrVersionVector) {
+        dotOrVersionVector = VersionVector.mergeDot(getVersionVector(parent), dotOrVersionVector as Hlc);
     }
     const versionVector = dotOrVersionVector;
-    const parent = ensurePath(root, path.slice(0, -1));
+
     const key = path[path.length - 1] as string;
 
     parent.tombstones ??= {};
