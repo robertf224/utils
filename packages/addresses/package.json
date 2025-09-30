@@ -1,0 +1,33 @@
+{
+    "name": "@bobbyfidz/addresses",
+    "version": "0.0.0",
+    "type": "module",
+    "files": [
+        "lib"
+    ],
+    "exports": {
+        ".": {
+            "types": "./lib/index.d.ts",
+            "default": "./lib/index.js"
+        },
+        "./services/google-maps": {
+            "types": "./lib/services/google-maps/index.d.ts",
+            "default": "./lib/services/google-maps/index.js"
+        }
+    },
+    "scripts": {
+        "build": "tsc",
+        "lint": "eslint"
+    },
+    "dependencies": {
+        "@bobbyfidz/panic": "workspace:*",
+        "@googlemaps/places": "^2.1.0"
+    },
+    "devDependencies": {
+        "@bobbyfidz/react-build-config": "workspace:*",
+        "@oclif/core": "^4.5.4",
+        "eslint": "^9.21.0",
+        "typescript": "~5.8.2",
+        "vitest": "^3.1.1"
+    }
+}
