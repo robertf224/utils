@@ -1,5 +1,11 @@
 # @bobbyfidz/react-build-config
 
+## 0.2.0
+
+### Minor Changes
+
+- 593289e: Add initial addresses library and google maps implementation
+
 ## 0.1.1
 
 ### Patch Changes
