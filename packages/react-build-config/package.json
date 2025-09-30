@@ -1,6 +1,6 @@
 {
     "name": "@bobbyfidz/react-build-config",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "dependencies": {
         "@bobbyfidz/universal-build-config": "workspace:*",
         "eslint-plugin-react": "^7.37.5",
