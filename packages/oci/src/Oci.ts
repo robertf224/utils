@@ -4,6 +4,7 @@ import { invariant } from "@bobbyfidz/panic";
 import { Temp } from "@bobbyfidz/temp";
 import * as tar from "tar";
 import { Crane } from "./Crane.js";
+import { Helm } from "./Helm.js";
 import { Oras } from "./Oras.js";
 
 async function publishImage(opts: {
@@ -109,8 +110,35 @@ async function pullArtifact(opts: {
     });
 }
 
+async function publishChart(opts: {
+    username?: string;
+    password?: string;
+    /** The path to build the chart from. */
+    path: string;
+    /** The version of the chart. */
+    version: string;
+    /** The repository URL to push to. */
+    repositoryUrl: string;
+}): Promise<void> {
+    const tempFolder = await Temp.folder();
+
+    const chartPath = await Helm.packageChart({
+        path: opts.path,
+        version: opts.version,
+        destinationFolder: tempFolder,
+    });
+
+    await Helm.push({
+        path: chartPath,
+        repositoryUrl: opts.repositoryUrl,
+        username: opts.username,
+        password: opts.password,
+    });
+}
+
 export const Oci = {
     publishImage,
     publishArtifact,
     pullArtifact,
+    publishChart,
 };
