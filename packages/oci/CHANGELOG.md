@@ -1,5 +1,11 @@
 # @bobbyfidz/oci
 
+## 0.4.0
+
+### Minor Changes
+
+- d786098: Add Helm wrapper
+
 ## 0.3.3
 
 ### Patch Changes
