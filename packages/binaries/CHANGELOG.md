@@ -1,5 +1,11 @@
 # @bobbyfidz/binaries
 
+## 0.3.0
+
+### Minor Changes
+
+- 13b1a56: Add Apollo wrapper
+
 ## 0.2.1
 
 ### Patch Changes
