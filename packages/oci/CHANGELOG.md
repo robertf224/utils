@@ -1,5 +1,16 @@
 # @bobbyfidz/oci
 
+## 0.5.0
+
+### Minor Changes
+
+- 3687adc: add strategies and fix helm + apollo installs
+
+### Patch Changes
+
+- Updated dependencies [3687adc]
+    - @bobbyfidz/binaries@0.4.0
+
 ## 0.4.1
 
 ### Patch Changes
