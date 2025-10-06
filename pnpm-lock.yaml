@@ -134,6 +134,9 @@ importers:
       '@bobbyfidz/panic':
         specifier: workspace:*
         version: link:../panic
+      '@bobbyfidz/temp':
+        specifier: workspace:*
+        version: link:../_temp
       tar:
         specifier: ^7.0.0
         version: 7.4.3

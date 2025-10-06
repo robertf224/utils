@@ -28,18 +28,12 @@ async function ensureBinary(opts: {
                     distribution = "macos";
                     break;
                 case "linux":
-                    invariant(binaryTarget.arch === "arm64", "Apollo CLI is only supported on arm64.");
+                    invariant(binaryTarget.arch === "x64", "Apollo CLI is only supported on amd64.");
                     distribution = "linux-amd64";
                     break;
                 case "windows":
-                    switch (binaryTarget.arch) {
-                        case "x64":
-                            distribution = "windows-386";
-                            break;
-                        case "arm64":
-                            distribution = "windows-amd64";
-                            break;
-                    }
+                    invariant(binaryTarget.arch === "x64", "Apollo CLI is only supported on amd64.");
+                    distribution = "windows-amd64";
                     break;
             }
             return {

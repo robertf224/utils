@@ -18,7 +18,8 @@
     },
     "dependencies": {
         "tar": "^7.0.0",
-        "@bobbyfidz/panic": "workspace:*"
+        "@bobbyfidz/panic": "workspace:*",
+        "@bobbyfidz/temp": "workspace:*"
     },
     "devDependencies": {
         "@bobbyfidz/universal-build-config": "workspace:*",

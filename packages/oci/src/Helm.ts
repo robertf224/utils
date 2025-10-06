@@ -27,8 +27,10 @@ async function ensureBinary(): Promise<string> {
                     break;
             }
             const arch = binaryTarget.arch === "x64" ? "amd64" : "arm64";
+            const platformAndArch = `${platform}-${arch}`;
             return {
-                url: `https://get.helm.sh/helm-v${VERSION}-${platform}-${arch}.tar.gz`,
+                url: `https://get.helm.sh/helm-v${VERSION}-${platformAndArch}.${platform === "windows" ? "zip" : "tar.gz"}`,
+                strategy: { type: "archive", binaryPath: `${platformAndArch}/helm` },
             };
         },
         path.join(import.meta.dirname, "..", "node_modules", ".cache", "oci")
@@ -92,6 +94,7 @@ async function push(opts: {
 }
 
 export const Helm = {
+    ensureBinary,
     packageChart,
     push,
 };

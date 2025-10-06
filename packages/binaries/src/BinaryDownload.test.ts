@@ -17,10 +17,15 @@ vi.mock("fs", () => ({
 // Mock fs/promises
 vi.mock("fs/promises", () => ({
     mkdir: vi.fn(),
+    rename: vi.fn(),
 }));
 
-// Mock os.homedir
+// Mock os module
 vi.mock("os", () => ({
+    default: {
+        homedir: vi.fn(() => "/home/test"),
+        tmpdir: vi.fn(() => "/tmp"),
+    },
     homedir: vi.fn(() => "/home/test"),
     tmpdir: vi.fn(() => "/tmp"),
 }));
@@ -57,6 +62,7 @@ vi.mock("crypto", () => ({
         update: vi.fn().mockReturnThis(),
         digest: vi.fn(() => "test-hash-1234567890abcdef"),
     })),
+    randomUUID: vi.fn(() => "test-uuid-12345678-1234-1234-1234-123456789012"),
 }));
 
 // Mock stream/promises
