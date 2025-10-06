@@ -1,5 +1,12 @@
 # @bobbyfidz/oci
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [13b1a56]
+    - @bobbyfidz/binaries@0.3.0
+
 ## 0.4.0
 
 ### Minor Changes
