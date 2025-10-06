@@ -46,7 +46,9 @@ async function downloadAndInstallBinary(
     );
 
     const urlPath = new URL(downloadUrl).pathname;
+    const hasExtension = urlPath.split("/").pop()?.includes(".");
     const isTarGz = urlPath.endsWith(".tar.gz") || urlPath.endsWith(".tgz");
+
     if (isTarGz) {
         await pipeline(
             Readable.fromWeb(response.body as ReadableStream),
@@ -57,8 +59,10 @@ async function downloadAndInstallBinary(
                 [binaryPath]
             )
         );
-    } else {
+    } else if (!hasExtension) {
         await pipeline(Readable.fromWeb(response.body as ReadableStream), createWriteStream(binaryPath));
+    } else {
+        throw new Error("Unsupported file type.");
     }
 }
 

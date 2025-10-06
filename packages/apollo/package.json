@@ -14,7 +14,7 @@
     "scripts": {
         "build": "tsc",
         "lint": "eslint",
-        "test": "vitest run"
+        "test": "vitest run --passWithNoTests"
     },
     "dependencies": {
         "@bobbyfidz/binaries": "workspace:*",
