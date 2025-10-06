@@ -1,4 +1,4 @@
-import { existsSync } from "fs";
+import { existsSync, createWriteStream } from "fs";
 import { mkdir } from "fs/promises";
 import path from "path";
 import { Readable } from "stream";
@@ -14,19 +14,20 @@ async function ensure(
     opts: (binaryTarget: BinaryTarget) => {
         url: string;
         // TODO: add hash verification
+        headers?: Record<string, string>;
     },
     destinationFolder: string
 ): Promise<string> {
     const binaryTarget = BinaryTarget.detectSystemTarget();
     invariant(binaryTarget, "Unsupported platform/architecture.");
 
-    const { url: downloadUrl } = opts(binaryTarget);
+    const { url: downloadUrl, headers } = opts(binaryTarget);
 
     const downloadPath = path.join(destinationFolder, name, version);
     const binaryPath = path.join(downloadPath, name);
     if (!existsSync(binaryPath)) {
         await mkdir(downloadPath, { recursive: true });
-        await downloadAndInstallBinary(downloadUrl, name, downloadPath);
+        await downloadAndInstallBinary(downloadUrl, name, downloadPath, headers);
     }
 
     return binaryPath;
@@ -35,9 +36,10 @@ async function ensure(
 async function downloadAndInstallBinary(
     downloadUrl: string,
     binaryPath: string,
-    downloadPath: string
+    downloadPath: string,
+    headers?: Record<string, string>
 ): Promise<void> {
-    const response = await fetch(downloadUrl);
+    const response = await fetch(downloadUrl, { headers });
     invariant(
         response.ok && response.body,
         `Failed to download ${downloadUrl} (${response.status}): ${response.statusText}`
@@ -45,17 +47,19 @@ async function downloadAndInstallBinary(
 
     const urlPath = new URL(downloadUrl).pathname;
     const isTarGz = urlPath.endsWith(".tar.gz") || urlPath.endsWith(".tgz");
-    invariant(isTarGz, "Unsupported file type.");
-
-    await pipeline(
-        Readable.fromWeb(response.body as ReadableStream),
-        tar.extract(
-            {
-                cwd: downloadPath,
-            },
-            [binaryPath]
-        )
-    );
+    if (isTarGz) {
+        await pipeline(
+            Readable.fromWeb(response.body as ReadableStream),
+            tar.extract(
+                {
+                    cwd: downloadPath,
+                },
+                [binaryPath]
+            )
+        );
+    } else {
+        await pipeline(Readable.fromWeb(response.body as ReadableStream), createWriteStream(binaryPath));
+    }
 }
 
 export const BinaryDownload = {
