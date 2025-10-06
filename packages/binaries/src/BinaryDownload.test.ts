@@ -122,7 +122,9 @@ describe("BinaryDownload", () => {
             expect(mockMkdir).toHaveBeenCalledWith("/destination/test-binary/1.0.0", {
                 recursive: true,
             });
-            expect(mockFetch).toHaveBeenCalledWith("https://example.com/test-binary-1.0.0.tar.gz");
+            expect(mockFetch).toHaveBeenCalledWith("https://example.com/test-binary-1.0.0.tar.gz", {
+                headers: undefined,
+            });
             expect(mockPipeline).toHaveBeenCalled();
             expect(result).toBe("/destination/test-binary/1.0.0/test-binary");
         });
