@@ -1,5 +1,11 @@
 # @bobbyfidz/binaries
 
+## 0.4.0
+
+### Minor Changes
+
+- 3687adc: add strategies and fix helm + apollo installs
+
 ## 0.3.0
 
 ### Minor Changes
