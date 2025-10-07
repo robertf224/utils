@@ -1,10 +1,10 @@
 import { exec } from "child_process";
+import { chmod } from "fs/promises";
 import path from "path";
 import { promisify } from "util";
 import { BinaryDownload } from "@bobbyfidz/binaries";
 import { invariant } from "@bobbyfidz/panic";
 import { Pathnames, Urls } from "@bobbyfidz/urls";
-import { createConfidentialOauthClient } from "@osdk/oauth";
 
 const execAsync = promisify(exec);
 
@@ -16,9 +16,29 @@ async function ensureBinary(opts: {
     clientId: string;
     clientSecret: string;
 }): Promise<string> {
-    const tokenProvider = createConfidentialOauthClient(opts.clientId, opts.clientSecret, opts.apolloUrl);
-    const token = await tokenProvider();
-    return BinaryDownload.ensure(
+    const token = await fetch(
+        Urls.extend(opts.apolloUrl, {
+            pathname: "/multipass/api/oauth2/token",
+        }),
+        {
+            method: "POST",
+            body: new URLSearchParams({
+                grant_type: "client_credentials",
+                client_id: opts.clientId,
+                client_secret: opts.clientSecret,
+            }),
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+        }
+    )
+        .then((response) => response.json() as Promise<{ access_token: string }>)
+        .then((data) => {
+            return data.access_token;
+        });
+    invariant(token, "Failed to get token.");
+
+    const binaryPath = await BinaryDownload.ensure(
         BINARY_NAME,
         VERSION,
         (binaryTarget) => {
@@ -48,6 +68,10 @@ async function ensureBinary(opts: {
         },
         path.join(import.meta.dirname, "..", "node_modules", ".cache", "apollo")
     );
+
+    await chmod(binaryPath, 0o755);
+
+    return binaryPath;
 }
 
 async function executeCommand(
@@ -102,4 +126,5 @@ export async function publishHelmChart(opts: {
 
 export const Apollo = {
     publishHelmChart,
+    ensureBinary,
 };
