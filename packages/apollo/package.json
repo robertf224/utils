@@ -19,8 +19,7 @@
     "dependencies": {
         "@bobbyfidz/binaries": "workspace:*",
         "@bobbyfidz/panic": "workspace:*",
-        "@bobbyfidz/urls": "workspace:*",
-        "@osdk/oauth": "^1.4.0"
+        "@bobbyfidz/urls": "workspace:*"
     },
     "devDependencies": {
         "@bobbyfidz/universal-build-config": "workspace:*",

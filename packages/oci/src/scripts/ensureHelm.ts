@@ -1,12 +1,13 @@
 import { Helm } from "../Helm.js";
 
-async function ensureHelm(): Promise<void> {
-    const helmPath = await Helm.ensureBinary();
-    console.log(helmPath);
+async function ensureHelm(): Promise<string> {
+    return Helm.ensureBinary();
 }
 
 ensureHelm()
-    .then(console.log)
+    .then((helmPath) => {
+        console.log(helmPath);
+    })
     .catch((error) => {
         console.error(error);
         process.exit(1);
