@@ -1,5 +1,11 @@
 # @bobbyfidz/apollo
 
+## 0.2.1
+
+### Patch Changes
+
+- efda65a: fix download
+
 ## 0.2.0
 
 ### Minor Changes
