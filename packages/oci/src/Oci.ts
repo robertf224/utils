@@ -116,11 +116,18 @@ async function publishChart(opts: {
     /** The path to build the chart from. */
     path: string;
     /** The version of the chart. */
-    version: string;
+    version?: string;
     /** The repository URL to push to. */
     repositoryUrl: string;
+    /** Path to the repositories configuration file. */
+    repositoryConfig?: string;
 }): Promise<void> {
     const tempFolder = await Temp.folder();
+
+    await Helm.dependencyBuild({
+        path: opts.path,
+        repositoryConfig: opts.repositoryConfig,
+    });
 
     const chartPath = await Helm.packageChart({
         path: opts.path,
