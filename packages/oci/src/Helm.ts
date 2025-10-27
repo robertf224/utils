@@ -49,11 +49,15 @@ async function packageChart(opts: {
     /** Path to the chart directory. */
     path: string;
     /** Version of the chart. */
-    version: string;
+    version?: string;
     /** Output folder for the packaged chart. */
     destinationFolder?: string;
 }): Promise<string> {
-    const args = ["package", opts.path, "--version", opts.version];
+    const args = ["package", opts.path];
+
+    if (opts.version) {
+        args.push("--version", opts.version);
+    }
 
     if (opts.destinationFolder) {
         args.push("--destination", opts.destinationFolder);
@@ -65,6 +69,24 @@ async function packageChart(opts: {
     invariant(match, "Failed to determine packaged chart path.");
 
     return match[1]!;
+}
+
+/**
+ * Build chart dependencies.
+ */
+async function dependencyBuild(opts: {
+    /** Path to the chart directory. */
+    path: string;
+    /** Path to the repositories configuration file. */
+    repositoryConfig?: string;
+}): Promise<void> {
+    const args = ["dependency", "build", opts.path];
+
+    if (opts.repositoryConfig) {
+        args.push("--repository-config", opts.repositoryConfig);
+    }
+
+    await executeCommand(args);
 }
 
 /**
@@ -95,6 +117,7 @@ async function push(opts: {
 
 export const Helm = {
     ensureBinary,
+    dependencyBuild,
     packageChart,
     push,
 };

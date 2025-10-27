@@ -35,6 +35,15 @@ vi.mock("@bobbyfidz/temp", () => ({
     },
 }));
 
+// Mock Helm
+vi.mock("./Helm.js", () => ({
+    Helm: {
+        dependencyBuild: vi.fn(),
+        packageChart: vi.fn(() => Promise.resolve("/tmp/test/chart-1.0.0.tgz")),
+        push: vi.fn(),
+    },
+}));
+
 describe("Oci", () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -132,6 +141,116 @@ describe("Oci", () => {
             expect(mockPush).toHaveBeenCalledWith({
                 paths: ["file.txt"],
                 tag: "localhost:5000/test:v1",
+            });
+        });
+    });
+
+    describe("publishChart", () => {
+        it("should call Helm functions with correct parameters", async () => {
+            const mockHelm = await import("./Helm.js");
+            const mockDependencyBuild = vi.mocked(mockHelm.Helm.dependencyBuild);
+            const mockPackageChart = vi.mocked(mockHelm.Helm.packageChart);
+            const mockPush = vi.mocked(mockHelm.Helm.push);
+
+            await Oci.publishChart({
+                path: "/path/to/chart",
+                version: "1.0.0",
+                repositoryUrl: "oci://registry.example.com/charts",
+                username: "user",
+                password: "pass",
+            });
+
+            expect(mockDependencyBuild).toHaveBeenCalledWith({
+                path: "/path/to/chart",
+            });
+
+            expect(mockPackageChart).toHaveBeenCalledWith({
+                path: "/path/to/chart",
+                version: "1.0.0",
+                destinationFolder: "/tmp/test",
+            });
+
+            expect(mockPush).toHaveBeenCalledWith({
+                path: "/tmp/test/chart-1.0.0.tgz",
+                repositoryUrl: "oci://registry.example.com/charts",
+                username: "user",
+                password: "pass",
+            });
+        });
+
+        it("should call dependencyBuild before packageChart", async () => {
+            const mockHelm = await import("./Helm.js");
+            const callOrder: string[] = [];
+
+            vi.mocked(mockHelm.Helm.dependencyBuild).mockImplementation(() => {
+                callOrder.push("dependencyBuild");
+                return Promise.resolve();
+            });
+
+            vi.mocked(mockHelm.Helm.packageChart).mockImplementation(() => {
+                callOrder.push("packageChart");
+                return Promise.resolve("/tmp/test/chart-1.0.0.tgz");
+            });
+
+            vi.mocked(mockHelm.Helm.push).mockImplementation(() => {
+                callOrder.push("push");
+                return Promise.resolve();
+            });
+
+            await Oci.publishChart({
+                path: "/path/to/chart",
+                version: "1.0.0",
+                repositoryUrl: "oci://registry.example.com/charts",
+            });
+
+            expect(callOrder).toEqual(["dependencyBuild", "packageChart", "push"]);
+        });
+
+        it("should pass repositoryConfig to dependencyBuild when provided", async () => {
+            const mockHelm = await import("./Helm.js");
+            const mockDependencyBuild = vi.mocked(mockHelm.Helm.dependencyBuild);
+
+            await Oci.publishChart({
+                path: "/path/to/chart",
+                version: "1.0.0",
+                repositoryUrl: "oci://registry.example.com/charts",
+                repositoryConfig: "/path/to/repositories.yaml",
+            });
+
+            expect(mockDependencyBuild).toHaveBeenCalledWith({
+                path: "/path/to/chart",
+                repositoryConfig: "/path/to/repositories.yaml",
+            });
+        });
+
+        it("should work without version parameter", async () => {
+            const mockHelm = await import("./Helm.js");
+            const mockPackageChart = vi.mocked(mockHelm.Helm.packageChart);
+
+            await Oci.publishChart({
+                path: "/path/to/chart",
+                repositoryUrl: "oci://registry.example.com/charts",
+            });
+
+            expect(mockPackageChart).toHaveBeenCalledWith({
+                path: "/path/to/chart",
+                destinationFolder: "/tmp/test",
+            });
+        });
+
+        it("should work without authentication", async () => {
+            const mockHelm = await import("./Helm.js");
+            const mockPush = vi.mocked(mockHelm.Helm.push);
+
+            await Oci.publishChart({
+                path: "/path/to/chart",
+                version: "1.0.0",
+                repositoryUrl: "oci://registry.example.com/charts",
+            });
+
+            expect(mockPush).toHaveBeenCalledWith({
+                path: "/tmp/test/chart-1.0.0.tgz",
+                repositoryUrl: "oci://registry.example.com/charts",
             });
         });
     });
