@@ -1,5 +1,11 @@
 # @bobbyfidz/oci
 
+## 0.6.0
+
+### Minor Changes
+
+- 00476d7: add helm dependency build to publishChart workflow
+
 ## 0.5.0
 
 ### Minor Changes
