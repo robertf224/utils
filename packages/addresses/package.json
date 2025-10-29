@@ -20,14 +20,14 @@
         "lint": "eslint"
     },
     "dependencies": {
-        "@bobbyfidz/panic": "workspace:*",
-        "@googlemaps/places": "^2.1.0"
+        "@bobbyfidz/panic": "workspace:*"
     },
     "devDependencies": {
         "@bobbyfidz/react-build-config": "workspace:*",
         "@oclif/core": "^4.5.4",
         "eslint": "^9.21.0",
         "typescript": "~5.8.2",
-        "vitest": "^3.1.1"
+        "vitest": "^3.1.1",
+        "@googlemaps/places": "^2.1.0"
     }
 }

@@ -1,6 +1,6 @@
 import { invariant } from "@bobbyfidz/panic";
-import { protos } from "@googlemaps/places";
 import { Address } from "../../Address.js";
+import type { protos } from "@googlemaps/places";
 
 // https://developers.google.com/maps/documentation/geocoding/requests-geocoding#Types
 
