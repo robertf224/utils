@@ -1,13 +1,13 @@
-import { PlacesClient } from "@googlemaps/places";
 import { Address } from "../../Address.js";
 import { AutocompleteAddressResult, AddressService, AutocompleteAddressBias } from "../../AddressService.js";
 import { convertGoogleMapsAddress } from "./convertGoogleMapsAddress.js";
+import type { protos } from "@googlemaps/places";
 
 export class GoogleMapsAddressService implements AddressService {
-    #client: PlacesClient;
+    #apiKey: string;
 
     constructor(apiKey: string) {
-        this.#client = new PlacesClient({ apiKey });
+        this.#apiKey = apiKey;
     }
 
     async autocompleteAddress(
@@ -22,24 +22,27 @@ export class GoogleMapsAddressService implements AddressService {
             headers["X-Forwarded-For"] = opts.bias.ip;
         }
 
-        const [response] = await this.#client.autocompletePlaces(
+        const response = await fetch(
+            `https://places.googleapis.com/v1/places:autocomplete?key=${this.#apiKey}`,
             {
-                input: query,
-                includedPrimaryTypes: ["street_address"],
-                sessionToken: opts.sessionToken,
-                // TODO: may need to convert from ccTLD to ISO 3166-1 alpha-2 code.
-                includedRegionCodes: opts.countries,
-            },
-            {
-                otherArgs: {
-                    headers,
-                },
+                method: "POST",
+                body: JSON.stringify({
+                    input: query,
+                    includedPrimaryTypes: ["street_address"],
+                    sessionToken: opts.sessionToken,
+                    // TODO: may need to convert from ccTLD to ISO 3166-1 alpha-2 code.
+                    includedRegionCodes: opts.countries,
+                }),
+                headers,
             }
         );
+        const { suggestions } = (await response.json()) as {
+            suggestions: { placePrediction: { placeId: string; text: { text: string } } }[];
+        };
 
-        return response.suggestions!.map((suggestion) => ({
-            id: suggestion.placePrediction!.placeId!,
-            label: suggestion.placePrediction!.text!.text!,
+        return suggestions.map((suggestion) => ({
+            id: suggestion.placePrediction.placeId,
+            label: suggestion.placePrediction.text.text,
         }));
     }
 
@@ -48,17 +51,19 @@ export class GoogleMapsAddressService implements AddressService {
             "X-Goog-FieldMask": "addressComponents",
         };
 
-        const [response] = await this.#client.getPlace(
-            { name: `places/${id}`, sessionToken: opts.sessionToken },
+        const response = await fetch(
+            `https://places.googleapis.com/v1/places/${id}?key=${this.#apiKey}&sessionToken=${opts.sessionToken}`,
             {
-                otherArgs: {
-                    headers,
-                },
+                method: "GET",
+                headers,
             }
         );
+        const { addressComponents } = (await response.json()) as {
+            addressComponents: protos.google.maps.places.v1.Place.IAddressComponent[];
+        };
 
         return {
-            address: convertGoogleMapsAddress(response.addressComponents!),
+            address: convertGoogleMapsAddress(addressComponents),
         };
     }
 }

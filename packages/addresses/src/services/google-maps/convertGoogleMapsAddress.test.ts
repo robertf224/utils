@@ -1,6 +1,6 @@
-import { protos } from "@googlemaps/places";
 import { describe, it, expect } from "vitest";
 import { convertGoogleMapsAddress } from "./convertGoogleMapsAddress";
+import type { protos } from "@googlemaps/places";
 
 describe("convertGoogleMapsAddress", () => {
     it("should convert a US address correctly", () => {
