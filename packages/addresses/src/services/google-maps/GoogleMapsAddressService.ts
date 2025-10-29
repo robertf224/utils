@@ -5,9 +5,11 @@ import type { protos } from "@googlemaps/places";
 
 export class GoogleMapsAddressService implements AddressService {
     #apiKey: string;
+    #fetch: typeof fetch;
 
-    constructor(apiKey: string) {
-        this.#apiKey = apiKey;
+    constructor(opts: { apiKey: string; fetch?: typeof fetch }) {
+        this.#apiKey = opts.apiKey;
+        this.#fetch = opts.fetch ?? fetch;
     }
 
     async autocompleteAddress(
@@ -22,7 +24,7 @@ export class GoogleMapsAddressService implements AddressService {
             headers["X-Forwarded-For"] = opts.bias.ip;
         }
 
-        const response = await fetch(
+        const response = await this.#fetch(
             `https://places.googleapis.com/v1/places:autocomplete?key=${this.#apiKey}`,
             {
                 method: "POST",
@@ -51,7 +53,7 @@ export class GoogleMapsAddressService implements AddressService {
             "X-Goog-FieldMask": "addressComponents",
         };
 
-        const response = await fetch(
+        const response = await this.#fetch(
             `https://places.googleapis.com/v1/places/${id}?key=${this.#apiKey}&sessionToken=${opts.sessionToken}`,
             {
                 method: "GET",
