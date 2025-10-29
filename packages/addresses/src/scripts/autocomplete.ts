@@ -4,7 +4,7 @@ import { GoogleMapsAddressService } from "../services/google-maps/index.js";
 
 async function autocomplete(query: string): Promise<Address> {
     invariant(process.env.GOOGLE_MAPS_API_KEY, "GOOGLE_MAPS_API_KEY is not set.");
-    const services = new GoogleMapsAddressService(process.env.GOOGLE_MAPS_API_KEY);
+    const services = new GoogleMapsAddressService({ apiKey: process.env.GOOGLE_MAPS_API_KEY });
 
     const sessionToken = crypto.randomUUID();
 
