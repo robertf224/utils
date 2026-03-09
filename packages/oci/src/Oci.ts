@@ -25,7 +25,7 @@ async function publishImage(opts: {
     tag: string;
     dryRun?: boolean;
     registries?: Array<{
-        domain: string;
+        registry: string;
         username: string;
         password: string;
     }>;
@@ -64,7 +64,7 @@ async function publishImage(opts: {
 
     for (const registry of opts.registries ?? []) {
         await Crane.login({
-            registry: registry.domain,
+            registry: registry.registry,
             username: registry.username,
             password: registry.password,
         });
