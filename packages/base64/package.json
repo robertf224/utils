@@ -24,7 +24,7 @@
     "devDependencies": {
         "@bobbyfidz/universal-build-config": "workspace:*",
         "jsdom": "^26.1.0",
-        "@types/node": "^20.17.30",
+        "@types/node": "^24",
         "eslint": "^9.21.0",
         "typescript": "~5.8.2",
         "vitest": "^3.1.1"
