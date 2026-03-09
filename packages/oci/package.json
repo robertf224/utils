@@ -1,16 +1,20 @@
 {
     "name": "@bobbyfidz/oci",
     "version": "0.7.0",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/robertf224/utils.git"
+    },
     "type": "module",
-    "files": [
-        "lib"
-    ],
     "exports": {
         ".": {
             "types": "./lib/index.d.ts",
             "default": "./lib/index.js"
         }
     },
+    "files": [
+        "lib"
+    ],
     "scripts": {
         "build": "tsc",
         "lint": "eslint",
@@ -18,8 +22,8 @@
     },
     "dependencies": {
         "@bobbyfidz/binaries": "workspace:*",
-        "@bobbyfidz/temp": "workspace:*",
         "@bobbyfidz/panic": "workspace:*",
+        "@bobbyfidz/temp": "workspace:*",
         "tar": "^7.0.0"
     },
     "devDependencies": {
