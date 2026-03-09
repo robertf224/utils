@@ -1,5 +1,11 @@
 # @bobbyfidz/oci
 
+## 0.7.1
+
+### Patch Changes
+
+- 020457d: change param name
+
 ## 0.7.0
 
 ### Minor Changes
