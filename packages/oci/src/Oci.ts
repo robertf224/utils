@@ -24,6 +24,11 @@ async function publishImage(opts: {
     /** The tag to apply to the new image. */
     tag: string;
     dryRun?: boolean;
+    registries?: Array<{
+        domain: string;
+        username: string;
+        password: string;
+    }>;
 }): Promise<void> {
     invariant(
         opts.copy.every((copy) => isAbsolute(copy.destinationFolder)),
@@ -54,6 +59,14 @@ async function publishImage(opts: {
             registry: opts.tag.split("/")[0]!,
             username: opts.username,
             password: opts.password,
+        });
+    }
+
+    for (const registry of opts.registries ?? []) {
+        await Crane.login({
+            registry: registry.domain,
+            username: registry.username,
+            password: registry.password,
         });
     }
 
