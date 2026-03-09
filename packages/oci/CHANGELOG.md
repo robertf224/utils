@@ -1,5 +1,11 @@
 # @bobbyfidz/oci
 
+## 0.7.0
+
+### Minor Changes
+
+- eb8ee75: add login for extra registries
+
 ## 0.6.0
 
 ### Minor Changes
