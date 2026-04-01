@@ -90,6 +90,21 @@ async function dependencyBuild(opts: {
 }
 
 /**
+ * Log in to a Helm registry.
+ */
+async function login(opts: { registry: string; username: string; password: string }): Promise<void> {
+    await executeCommand([
+        "registry",
+        "login",
+        opts.registry,
+        "--username",
+        opts.username,
+        "--password",
+        opts.password,
+    ]);
+}
+
+/**
  * Push a Helm chart to a repository.
  */
 async function push(opts: {
@@ -118,6 +133,7 @@ async function push(opts: {
 export const Helm = {
     ensureBinary,
     dependencyBuild,
+    login,
     packageChart,
     push,
 };
