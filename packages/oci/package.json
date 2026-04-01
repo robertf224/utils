@@ -1,6 +1,6 @@
 {
     "name": "@bobbyfidz/oci",
-    "version": "0.7.1",
+    "version": "0.8.0",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/robertf224/utils.git"
