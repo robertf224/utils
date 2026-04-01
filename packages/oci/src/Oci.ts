@@ -134,8 +134,21 @@ async function publishChart(opts: {
     repositoryUrl: string;
     /** Path to the repositories configuration file. */
     repositoryConfig?: string;
+    registries?: Array<{
+        registry: string;
+        username: string;
+        password: string;
+    }>;
 }): Promise<void> {
     const tempFolder = await Temp.folder();
+
+    for (const registry of opts.registries ?? []) {
+        await Helm.login({
+            registry: registry.registry,
+            username: registry.username,
+            password: registry.password,
+        });
+    }
 
     await Helm.dependencyBuild({
         path: opts.path,
