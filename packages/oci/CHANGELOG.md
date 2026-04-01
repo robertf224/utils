@@ -1,5 +1,11 @@
 # @bobbyfidz/oci
 
+## 0.8.0
+
+### Minor Changes
+
+- 66aac28: add extra helm registry auth
+
 ## 0.7.1
 
 ### Patch Changes
